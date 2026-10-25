@@ -4,7 +4,7 @@
 
 Samsung Innovation Campus Batch 8 · Selection Phase 2 — *IoT: Device and Hardware Discovery* · BINUS University · SDG 10 (Reduced Inequalities)
 
-> Contributors and AI agents: read [`AGENTS.md`](AGENTS.md) first.
+> Contributors and AI agents: read [`AGENTS.md`](AGENTS.md) first. Branching, commit and naming rules are in §11.
 
 ## Features (Stage 2)
 

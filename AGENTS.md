@@ -132,7 +132,7 @@ When you work in this project:
 7. **Secrets stay out.** HiveMQ username/password go in `firmware/secrets.h` and `dashboard/.env`, both git-ignored. Only commit `secrets.example.h` / `.env.example`.
 8. **Report language is Bahasa Indonesia**, following `report/Template-Laporan-Stage-2.docx` section order. Code comments and identifiers in English.
 9. **Keep it simple.** Prefer the smallest change that meets the decided features. Anything extra goes to "Pengembangan Lanjutan" (section 14), not into the build.
-10. **Git:** each human commits and pushes their own work. Agents may prepare changes and a commit message, but leave committing to the human unless told otherwise.
+10. **Git:** follow §11 (branch names, commit format, PRs). Each human commits and pushes their own work. Agents may prepare changes and a commit message in the §11 format, but leave committing to the human unless told otherwise.
 11. **Leave a trail.** After a work session, add 1–3 lines to your human's section in `STATUS.md`.
 
 ---
@@ -196,3 +196,80 @@ From the official Stage 2 guideline:
 - [ ] MQTT via HiveMQ + Python (paho-mqtt) dashboard with Plotly/Matplotlib
 - [ ] Every component has a technical reason; every stand-in part is explained
 - [ ] Section 12 lists real contributions of all four members
+
+---
+
+## 11. Git conventions
+
+Keep it light: we have 5 days, so these rules exist only to stop us breaking `main` and overwriting each other.
+
+### Branches
+
+- **`main` always works**: Wokwi opens and runs, the dashboard starts. Nobody pushes code to `main` directly.
+- One short-lived branch per task, merged within a day, deleted after merge. Pull `main` before you start.
+- Name: **`<name>/<type>/<short-desc>`**, all lowercase, words joined with `-`.
+
+| Example | Who |
+|---|---|
+| `kezia/docs/latar-belakang` | Kezia |
+| `gebi/feat/wokwi-circuit` | Gebi |
+| `william/feat/alert-logic` | William |
+| `stanley/feat/live-dashboard` | Stanley |
+| `gebi/contract/c1-pin-map` | contract owner only |
+| `william/fix/buzzer-pin` | after freeze: only `fix` branches |
+
+- **Exception:** your own section of `STATUS.md` may be pushed straight to `main` (it changes daily and touches nobody else).
+- **After feature freeze (Wed 28, 20:00):** only `fix/` branches, and each fix is agreed in the group first.
+
+### Commit messages
+
+Format: **`<type>(<scope>): <what changed>`** — English, imperative ("add", not "added"), ≤ 72 characters, no full stop.
+
+| Type | Use for |
+|---|---|
+| `feat` | new behaviour (sensor read, alert, dashboard chart) |
+| `fix` | bug fix |
+| `docs` | report text, README, AGENTS.md, STATUS.md |
+| `test` | test scenarios, results, test screenshots |
+| `contract` | a change to C1–C4 (needs all four 👍 first, §5) |
+| `chore` | repo setup, `.gitignore`, dependencies |
+
+Scopes: `firmware`, `wiring`, `dashboard`, `mqtt`, `tests`, `report`, `video`, `research`, `c1`–`c4`, `repo`.
+
+```
+feat(firmware): trigger vibration when step-down > 15 cm
+fix(wiring): move buzzer from GPIO 2 to GPIO 25
+feat(dashboard): plot distance_cm live from device/status
+test(tests): add abnormal case for sensor timeout
+docs(report): draft section 1 latar belakang
+contract(c3): add LOW_BATTERY event
+```
+
+A `contract(...)` commit says in its body when the team approved it, e.g. `Approved by all four in group, Mon 26 Oct 17:40`.
+
+### Pull requests
+
+- Title uses the same format as a commit message.
+- Reviewer is your pair from §3 (Gebi → William, William → Gebi, Stanley → William, Kezia → Stanley). Review within 6 hours.
+- Fill in the PR template (`.github/pull_request_template.md`): what changed, how it was tested in Wokwi, whether a contract is touched.
+- **Squash and merge**, so `main` gets one clean commit per task. Delete the branch afterwards.
+
+### Names in files and code
+
+| Thing | Convention | Example |
+|---|---|---|
+| Folders and general files | lowercase, `-` or `_` as already used in the repo | `test_scenarios.md` |
+| Wokwi files | fixed names (Wokwi needs them) | `sketch.ino`, `diagram.json` |
+| Contracts | `C<n>_<topic>.md` | `C1_pin_map.md` |
+| Report section drafts | `report/sections/NN_short-title.docx` (C4) | `07_logika-program.docx` |
+| Final report | `report/final/FAHHH_SIC8_Stage2_Laporan.docx` | |
+| Screenshots | `assets/screenshots/R<role>_<topic>_<nn>.png` (C4) | `R4_test_03.png` |
+| Diagrams | `assets/diagrams/<name>.png` (C4) | `block-diagram.png` |
+| Firmware pins and constants | `UPPER_SNAKE_CASE`, pins start with `PIN_` | `PIN_TRIG`, `STEP_DOWN_CM` |
+| Firmware functions and variables | `camelCase` | `readDistance()`, `alertState` |
+| Python | `snake_case` files, functions and variables | `fake_publisher.py`, `on_message()` |
+| MQTT topics | lowercase, `/`-separated, prefix `sic8/fahhh/` (C3) | `sic8/fahhh/device/events` |
+| Event and state names | `UPPER_SNAKE_CASE` (C2/C3) | `BOARDING_GAP`, `WARNING` |
+| JSON keys | `snake_case` (C3) | `distance_cm`, `device_id` |
+
+**`.docx` files can't be merged by Git.** Only the writer of a section edits that section file; only Kezia edits `report/final/`. If two people need the same `.docx`, agree in the group first.

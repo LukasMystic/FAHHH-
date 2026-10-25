@@ -1,0 +1,26 @@
+# Secrets (never commit)
+firmware/secrets.h
+dashboard/.env
+.env
+
+# Video files are too large for GitHub; share the link in report section 15 instead
+*.mp4
+*.mov
+video/raw/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Build / IDE
+.pio/
+build/
+.vscode/
+.idea/
+
+# OS / Office temp files
+.DS_Store
+~$*

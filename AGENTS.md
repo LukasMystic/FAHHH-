@@ -132,7 +132,7 @@ When you work in this project:
 7. **Secrets stay out.** HiveMQ username/password go in `firmware/secrets.h` and `dashboard/.env`, both git-ignored. Only commit `secrets.example.h` / `.env.example`.
 8. **Report language is Bahasa Indonesia**, following `report/Template-Laporan-Stage-2.docx` section order. Code comments and identifiers in English.
 9. **Keep it simple.** Prefer the smallest change that meets the decided features. Anything extra goes to "Pengembangan Lanjutan" (section 14), not into the build.
-10. **Git:** follow §11 (branch names, commit format, PRs). Each human commits and pushes their own work. Agents may prepare changes and a commit message in the §11 format, but leave committing to the human unless told otherwise.
+10. **Git:** follow §11. **Never merge, never push to `main`.** With your human's permission you may create a branch, commit (§11 format) and open a PR that names the member you work for. Merging is always done by a human after the reviewer approves.
 11. **Leave a trail.** After a work session, add 1–3 lines to your human's section in `STATUS.md`.
 
 ---
@@ -253,6 +253,7 @@ A `contract(...)` commit says in its body when the team approved it, e.g. `Appro
 - Reviewer is your pair from §3 (Gebi → William, William → Gebi, Stanley → William, Kezia → Stanley). Review within 6 hours.
 - Fill in the PR template (`.github/pull_request_template.md`): what changed, how it was tested in Wokwi, whether a contract is touched.
 - **Squash and merge**, so `main` gets one clean commit per task. Delete the branch afterwards.
+- **Only humans merge.** AI agents open PRs; they never merge, approve, or push to `main`.
 
 ### Names in files and code
 

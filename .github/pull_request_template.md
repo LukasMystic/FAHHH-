@@ -1,5 +1,7 @@
 <!-- Title: <type>(<scope>): <what changed>   e.g. feat(firmware): add step-down alert -->
 
+**Author:** <member>  ·  **Made with AI agent?** no / yes (<tool>)
+
 ## What changed
 -
 

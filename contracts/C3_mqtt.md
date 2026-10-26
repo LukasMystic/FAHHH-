@@ -19,11 +19,15 @@ No dashboard → device commands in Stage 2 (e.g. *companion acknowledges emerge
 
 | | |
 |---|---|
-| Broker | HiveMQ Cloud (Serverless, free) |
-| Port | 8883 (TLS) |
-| Credentials | Shared privately by Stanley. Firmware: `firmware/secrets.h`. Dashboard: `dashboard/.env`. Never committed. |
+| Broker | **HiveMQ public broker** — `broker.hivemq.com` |
+| Port | **8883** (MQTT over TLS) · 1883 plain TCP only for quick local tests |
+| Login | None (public broker has no username/password) |
 | Topic prefix | `sic8/fahhh/` |
-| Fallback if TLS fails in Wokwi | `broker.hivemq.com`, port 1883, no login (public, test only — agree in group before switching) |
+| Decided | Mon 26 Oct, all four agreed |
+
+**Why not HiveMQ Cloud:** free Serverless clusters can no longer be created, and the Starter trial needs a credit card and ends after 15 days (before judging ends). The report explains this in section 8.2 and lists a private HiveMQ Cloud cluster with logins in section 14.
+
+**Because the broker is public:** anyone can read or publish on any topic. So: demo data only, no personal data; the dashboard must ignore messages it can't parse; client IDs must be unique worldwide (below).
 
 **Client IDs** (must be unique, or the broker kicks the older one off):
 
@@ -95,7 +99,7 @@ Final list comes from C2 (William). Current candidates:
 
 | Topic | Decision | Why |
 |---|---|---|
-| Broker | HiveMQ Cloud, TLS 8883; public `broker.hivemq.com:1883` only as agreed fallback | Private + meets the guideline; fallback keeps William unblocked |
+| Broker | HiveMQ public broker, TLS 8883, no login (team decision Mon 26) | Free, no card, no trial end; keeps HiveMQ as in the guideline |
 | Direction | One way (device → dashboard) | Smaller scope for 5 days; downlink is future work |
 | Heartbeat | Every 2 s | Live chart looks responsive in the demo video |
 | Time | `uptime_s` from the ESP32, dashboard stamps arrival time | No NTP code, one less failure point in Wokwi |
@@ -120,7 +124,8 @@ const char* T_ONLINE = "sic8/fahhh/device/online";
 void connectMqtt() {
   if (WiFi.status() != WL_CONNECTED || mqtt.connected()) return;
   // Last Will: broker publishes "0" (retained) if we drop off
-  if (mqtt.connect("fahhh-esp32-unit-01", MQTT_USER, MQTT_PASS,
+  // public broker: no username/password (nullptr)
+  if (mqtt.connect("fahhh-esp32-unit-01", nullptr, nullptr,
                    T_ONLINE, 1, true, "0")) {
     mqtt.publish(T_ONLINE, "1", true);
   }
@@ -142,4 +147,4 @@ void loop() {
 }
 ```
 
-Notes: `connectMqtt()` must not loop or block, or alerts would wait for the network. Retry at most every few seconds (track `millis()`). `setInsecure()` is acceptable for the Wokwi demo; the report should mention that a real device would verify HiveMQ's certificate.
+Notes: `connectMqtt()` must not loop or block, or alerts would wait for the network. Retry at most every few seconds (track `millis()`). `setInsecure()` is acceptable for the Wokwi demo; the report should mention that a real device would verify the broker's certificate and use a private broker with logins.

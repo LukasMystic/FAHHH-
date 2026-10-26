@@ -79,7 +79,7 @@ A contract is a short file that fixes where two roles meet. Build against the co
 
 **C3 · MQTT (draft, Stanley)** — summary only; the full contract is `contracts/C3_mqtt.md`. One way only (device → dashboard).
 
-Broker: HiveMQ Cloud. Prefix: `sic8/fahhh/`.
+Broker: HiveMQ public broker `broker.hivemq.com:8883` (TLS, no login; team decision Mon 26, explained in report 8.2). Prefix: `sic8/fahhh/`.
 
 | Direction | Topic | When |
 |---|---|---|
@@ -130,7 +130,7 @@ When you work in this project:
 4. **No invented results.** Test results, Serial output and screenshots come only from real Wokwi runs. If a result is not available, write `[TBD — run in Wokwi]`.
 5. **No invented facts.** Background and problem claims need a source in `research/`. If unsure, mark `[needs source]`.
 6. **Wokwi first.** Only propose components that exist in Wokwi. If a real part is missing, propose a stand-in and say so explicitly (the report must explain it).
-7. **Secrets stay out.** HiveMQ username/password go in `firmware/secrets.h` and `dashboard/.env`, both git-ignored. Only commit `secrets.example.h` / `.env.example`.
+7. **Secrets stay out.** Any Wi-Fi or broker credentials go in `firmware/secrets.h` and `dashboard/.env`, both git-ignored. The public broker has no login, but keep the pattern. Only commit `secrets.example.h` / `.env.example`.
 8. **Report language is Bahasa Indonesia**, following `report/Template-Laporan-Stage-2.docx` section order. Code comments and identifiers in English.
 9. **Keep it simple.** Prefer the smallest change that meets the decided features. Anything extra goes to "Pengembangan Lanjutan" (section 14), not into the build.
 10. **Git:** follow §11. **Never merge, never push to `main`.** With your human's permission you may create a branch, commit (§11 format) and open a PR that names the member you work for. Merging is always done by a human after the reviewer approves.
@@ -194,7 +194,7 @@ From the official Stage 2 guideline:
 - [ ] Test screenshots
 - [ ] ESP32 as main controller, ≥1 input, ≥1 output, Serial Monitor used
 - [ ] ≥3 test scenarios incl. abnormal case, with input / expected / actual / status
-- [ ] MQTT via HiveMQ + Python (paho-mqtt) dashboard with Plotly/Matplotlib
+- [ ] MQTT via HiveMQ (public broker, reason in 8.2) + Python (paho-mqtt) dashboard with Plotly/Matplotlib
 - [ ] Every component has a technical reason; every stand-in part is explained
 - [ ] Section 12 lists real contributions of all four members
 

@@ -15,7 +15,6 @@ import json
 import os
 import random
 import ssl
-import sys
 import time
 
 from dotenv import load_dotenv
@@ -35,12 +34,12 @@ EVENTS = {
 
 
 def load_config():
-    load_dotenv()
+    load_dotenv()  # optional: defaults are the HiveMQ public broker (C3)
     prefix = os.getenv("TOPIC_PREFIX", "sic8/fahhh/")
     if not prefix.endswith("/"):
         prefix += "/"
     return {
-        "host": os.getenv("MQTT_HOST", ""),
+        "host": os.getenv("MQTT_HOST", "broker.hivemq.com"),
         "port": int(os.getenv("MQTT_PORT", "8883")),
         "user": os.getenv("MQTT_USER", ""),
         "password": os.getenv("MQTT_PASS", ""),
@@ -89,8 +88,6 @@ def main():
     client = None
 
     if not args.dry_run:
-        if not cfg["host"] or "your-cluster" in cfg["host"]:
-            sys.exit("Fill in dashboard/.env first (copy from .env.example), or use --dry-run.")
         client = connect(cfg, f"fahhh-fake-{args.name}", prefix)
 
     def publish(topic, payload, qos):

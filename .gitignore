@@ -12,6 +12,8 @@ video/raw/
 __pycache__/
 *.pyc
 .venv/
+# team virtual environment (python3 -m venv SIC)
+SIC/
 venv/
 .ipynb_checkpoints/
 

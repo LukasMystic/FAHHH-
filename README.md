@@ -126,9 +126,9 @@ AI agents **never merge and never push to `main`**. An agent may create a branch
 
 **Dashboard:**
 ```bash
+python3 -m venv SIC && source SIC/bin/activate   # repo root, git-ignored
+pip install -r dashboard/requirements.txt
 cd dashboard
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
 cp .env.example .env   # optional: defaults = HiveMQ public broker
 python fake_publisher.py   # optional: test data without the ESP32
 ```

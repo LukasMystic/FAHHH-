@@ -77,17 +77,18 @@ A contract is a short file that fixes where two roles meet. Build against the co
 
 ### Starting drafts (owners replace these)
 
-**C3 · MQTT (draft, Stanley)**
+**C3 · MQTT (draft, Stanley)** — summary only; the full contract is `contracts/C3_mqtt.md`. One way only (device → dashboard).
 
 Broker: HiveMQ Cloud. Prefix: `sic8/fahhh/`.
 
 | Direction | Topic | When |
 |---|---|---|
 | ESP32 → broker | `sic8/fahhh/device/events` | On every state change |
-| ESP32 → broker | `sic8/fahhh/device/status` | Every 5 s (heartbeat) |
+| ESP32 → broker | `sic8/fahhh/device/status` | Every 2 s (heartbeat) |
+| ESP32 → broker | `sic8/fahhh/device/online` | `"1"` on connect, `"0"` as Last Will (retained) |
 
 ```json
-{ "device_id": "unit-01", "ts": 1761380000, "event": "LEVEL_CHANGE",
+{ "device_id": "unit-01", "uptime_s": 132, "event": "LEVEL_CHANGE",
   "state": "WARNING", "distance_cm": 42, "battery": 87 }
 ```
 

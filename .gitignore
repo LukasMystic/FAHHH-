@@ -9,6 +9,8 @@ dashboard/.env
 video/raw/
 
 # Python
+# dashboard CSV logs (copy the ones used as test evidence to tests/results/)
+dashboard/data/
 __pycache__/
 *.pyc
 .venv/

@@ -130,5 +130,6 @@ python3 -m venv SIC && source SIC/bin/activate   # repo root, git-ignored
 pip install -r dashboard/requirements.txt
 cd dashboard
 cp .env.example .env   # optional: defaults = HiveMQ public broker
-python fake_publisher.py   # optional: test data without the ESP32
+python dashboard.py        # open http://127.0.0.1:8050
+python fake_publisher.py   # second terminal: test data without the ESP32
 ```

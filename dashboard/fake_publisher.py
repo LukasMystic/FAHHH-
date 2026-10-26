@@ -12,66 +12,55 @@ Usage:
 
 import argparse
 import json
-import os
 import random
-import ssl
+import threading
 import time
 
-from dotenv import load_dotenv
+from mqtt_common import DEVICE_ID, T_EVENTS, T_ONLINE, T_STATUS, load_config, make_client
 
-DEVICE_ID = "unit-01"
 STATUS_EVERY_S = 2
+CONNECT_TIMEOUT_S = 10
 
-# Candidate events from C3; final list comes from C2.
+# Candidate events from C3 (final list comes from C2): event -> (state, weight).
+# Weights keep the demo believable: emergencies and sensor errors are rare.
 EVENTS = {
-    "BOARDING_GAP": "WARNING",
-    "LEVEL_CHANGE": "WARNING",
-    "GUIDE_STEP": "GUIDING",
-    "ARRIVED_PLATFORM": "NORMAL",
-    "EMERGENCY": "EMERGENCY",
-    "SENSOR_ERROR": "ERROR",
+    "LEVEL_CHANGE": ("WARNING", 30),
+    "BOARDING_GAP": ("WARNING", 25),
+    "GUIDE_STEP": ("GUIDING", 30),
+    "ARRIVED_PLATFORM": ("NORMAL", 8),
+    "SENSOR_ERROR": ("ERROR", 4),
+    "EMERGENCY": ("EMERGENCY", 3),
 }
-
-
-def load_config():
-    load_dotenv()  # optional: defaults are the HiveMQ public broker (C3)
-    prefix = os.getenv("TOPIC_PREFIX", "sic8/fahhh/")
-    if not prefix.endswith("/"):
-        prefix += "/"
-    return {
-        "host": os.getenv("MQTT_HOST", "broker.hivemq.com"),
-        "port": int(os.getenv("MQTT_PORT", "8883")),
-        "user": os.getenv("MQTT_USER", ""),
-        "password": os.getenv("MQTT_PASS", ""),
-        "prefix": prefix,
-    }
+EVENT_CHANCE = 0.25        # chance of an event per heartbeat
+STATE_HOLD_BEATS = (1, 3)  # how many heartbeats a non-normal state lasts
 
 
 def connect(cfg, client_id, prefix):
-    import paho.mqtt.client as mqtt
-
-    client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id=client_id)
-    if cfg["user"]:
-        client.username_pw_set(cfg["user"], cfg["password"])
-    if cfg["port"] == 8883:
-        client.tls_set(tls_version=ssl.PROTOCOL_TLS_CLIENT)
+    client = make_client(cfg, client_id)
+    connected = threading.Event()
     # Last Will: broker publishes "0" if we disappear (C3 device/online)
-    client.will_set(prefix + "device/online", "0", qos=1, retain=True)
+    client.will_set(prefix + T_ONLINE, "0", qos=1, retain=True)
 
     def on_connect(c, userdata, flags, reason_code, properties):
         if reason_code.is_failure:
             print(f"[mqtt] connect failed: {reason_code}")
             return
         print(f"[mqtt] connected to {cfg['host']}:{cfg['port']} as {client_id}")
-        c.publish(prefix + "device/online", "1", qos=1, retain=True)
+        c.publish(prefix + T_ONLINE, "1", qos=1, retain=True)
+        connected.set()
 
     def on_disconnect(c, userdata, flags, reason_code, properties):
+        connected.clear()
         print(f"[mqtt] disconnected: {reason_code}")
 
     client.on_connect = on_connect
     client.on_disconnect = on_disconnect
-    client.connect(cfg["host"], cfg["port"], keepalive=30)
+    client.connect_async(cfg["host"], cfg["port"], keepalive=30)
     client.loop_start()
+    # Do not publish before the connection is up (first messages could be lost)
+    if not connected.wait(CONNECT_TIMEOUT_S):
+        client.loop_stop()
+        raise SystemExit(f"[mqtt] could not connect to {cfg['host']}:{cfg['port']} within {CONNECT_TIMEOUT_S} s")
     return client
 
 
@@ -85,10 +74,7 @@ def main():
     cfg = load_config()
     prefix = cfg["prefix"]
     every = 1 if args.fast else STATUS_EVERY_S
-    client = None
-
-    if not args.dry_run:
-        client = connect(cfg, f"fahhh-fake-{args.name}", prefix)
+    client = None if args.dry_run else connect(cfg, f"fahhh-fake-{args.name}", prefix)
 
     def publish(topic, payload, qos):
         text = json.dumps(payload, separators=(",", ":"))
@@ -98,10 +84,13 @@ def main():
         if client:
             client.publish(prefix + topic, text, qos=qos)
 
+    names = list(EVENTS)
+    weights = [EVENTS[n][1] for n in names]
     start = time.time()
     battery = 100.0
-    state = "NORMAL"
     distance = 120.0
+    state, hold = "NORMAL", 0
+    low_battery_sent = False
     print("Ctrl+C to stop.")
     try:
         while True:
@@ -109,36 +98,42 @@ def main():
             battery = max(0.0, battery - random.uniform(0.05, 0.3))
             distance = min(300.0, max(5.0, distance + random.uniform(-25, 25)))
 
-            # roughly one event every 3 heartbeats
-            if random.random() < 0.33:
-                event = random.choice(list(EVENTS))
-                state = EVENTS[event]
-                dist = -1 if event == "SENSOR_ERROR" else round(distance)
-                publish("device/events", {
-                    "device_id": DEVICE_ID, "uptime_s": uptime, "event": event,
-                    "state": state, "distance_cm": dist, "battery": round(battery),
-                }, qos=1)
-            elif state != "NORMAL" and random.random() < 0.5:
-                state = "NORMAL"
-
-            if battery < 20 and random.random() < 0.2:
-                publish("device/events", {
-                    "device_id": DEVICE_ID, "uptime_s": uptime, "event": "LOW_BATTERY",
-                    "state": state, "distance_cm": round(distance), "battery": round(battery),
+            if hold > 0:
+                hold -= 1
+                if hold == 0:
+                    state = "NORMAL"
+            elif random.random() < EVENT_CHANCE:
+                event = random.choices(names, weights)[0]
+                state = EVENTS[event][0]
+                hold = random.randint(*STATE_HOLD_BEATS) if state != "NORMAL" else 0
+                publish(T_EVENTS, {
+                    "device_id": DEVICE_ID, "uptime_s": uptime, "event": event, "state": state,
+                    "distance_cm": -1 if state == "ERROR" else round(distance),
+                    "battery": round(battery),
                 }, qos=1)
 
-            publish("device/status", {
+            if battery < 20 and not low_battery_sent:
+                low_battery_sent = True
+                publish(T_EVENTS, {
+                    "device_id": DEVICE_ID, "uptime_s": uptime, "event": "LOW_BATTERY", "state": state,
+                    "distance_cm": -1 if state == "ERROR" else round(distance),
+                    "battery": round(battery),
+                }, qos=1)
+
+            publish(T_STATUS, {
                 "device_id": DEVICE_ID, "uptime_s": uptime, "state": state,
-                "distance_cm": round(distance), "battery": round(battery),
+                # while the sensor is in error there is no valid reading (C3: -1)
+                "distance_cm": -1 if state == "ERROR" else round(distance),
+                "battery": round(battery),
             }, qos=0)
             time.sleep(every)
     except KeyboardInterrupt:
         print("\nstopping")
     finally:
         if client:
-            client.publish(prefix + "device/online", "0", qos=1, retain=True).wait_for_publish(2)
-            client.loop_stop()
+            client.publish(prefix + T_ONLINE, "0", qos=1, retain=True).wait_for_publish(2)
             client.disconnect()
+            client.loop_stop()
 
 
 if __name__ == "__main__":

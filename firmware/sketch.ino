@@ -37,6 +37,7 @@ constexpr float BEACON_NEAR_DBM=-100.0f+2600.0f*60.0f/4095.0f;
 constexpr float BEACON_FAR_DBM=-100.0f+2100.0f*60.0f/4095.0f;
 
 // Pada Wokwi, potensiometer 0..4095 mewakili RSSI -100..-40 dBm.
+<<<<<<< Updated upstream
 // Pada alat nyata, ganti isi fungsi ini dengan hasil pemindaian BLE.
 float readDoorBeaconRSSI() {
   beaconAdc=analogRead(BEACON);
@@ -95,6 +96,66 @@ void menuMove(int dir) {
   }
   pulse(1,45,50,650);
 }
+=======
+  // Pada alat nyata, ganti isi fungsi ini dengan hasil pemindaian BLE.
+  float readDoorBeaconRSSI() {
+    beaconAdc=analogRead(BEACON);
+    return -100.0f+beaconAdc*60.0f/4095.0f;
+  }
+
+// Proyeksi jarak miring ke tinggi vertikal. Sudut yang terlalu besar atau
+// pembacaan MPU yang hilang membuat hasil tidak layak untuk deteksi tepi.
+float correctedGroundDistanceCm(float measuredCm,float caneTiltDeg) {
+  if(!isfinite(measuredCm) || !isfinite(caneTiltDeg) || caneTiltDeg>MAX_EDGE_TILT_DEG)return NAN;
+  return measuredCm*cosf(caneTiltDeg*PI/180.0f);
+}
+
+const char *stateName(State s) {
+  switch(s) {
+    case SELECT_LINE:return "SELECT_LINE"; case SELECT_DEST:return "SELECT_DEST";
+    case SEEK_PLATFORM:return "SEEK_PLATFORM"; case WAIT_TRAIN:return "WAIT_TRAIN";
+    case ON_TRAIN:return "ON_TRAIN"; case ARRIVING:return "ARRIVING";
+    case COMPLETE:return "COMPLETE"; default:return "EMERGENCY";
+  }
+}
+void event(const char *name,const char *source) {
+  Serial.printf("EVENT t=%lu event=%s state=%s source=%s distance_cm=%.1f beacon_adc=%d\n",millis(),name,stateName(state),source,distanceCm,beaconAdc);
+}
+void changeState(State next,const char *source) {
+  if(state==next)return;
+  Serial.printf("STATE %s -> %s source=%s\n",stateName(state),stateName(next),source);
+  state=next; event(stateName(next),source);
+}
+
+// Bunyi dan LED tanpa delay panjang.
+struct Pattern { int count,onMs,offMs,hz,step; unsigned long next; } pat={0,0,0,0,0,0};
+void pulse(int count,int onMs,int offMs,int hz) {
+  if(help && hz!=1600)return;
+  pat={count,onMs,offMs,hz,0,millis()};
+}
+void servicePulse() {
+  if(!pat.count || millis()<pat.next)return;
+  bool on=(pat.step%2)==0;
+  digitalWrite(LED_GETAR,on?HIGH:LOW);
+  if(on)tone(BUZZ,pat.hz); else noTone(BUZZ);
+  pat.next=millis()+(on?pat.onMs:pat.offMs);
+  pat.step++;
+  if(pat.step>=pat.count*2)pat.count=0;
+}
+
+volatile int encoderSteps=0;
+void IRAM_ATTR encoderTick() { encoderSteps+=digitalRead(ENC_DT)==HIGH?1:-1; }
+void menuMove(int dir) {
+  if(state==SELECT_LINE) {
+    lineNo=(lineNo+2+dir)%2;
+    Serial.printf("MENU line=%s (%d/2)\n",LINE_NAME[lineNo],lineNo+1);
+  } else if(state==SELECT_DEST) {
+    destNo=(destNo+LENGTH[lineNo]+dir)%LENGTH[lineNo];
+    Serial.printf("MENU destination=%s %s (%d/%d)\n",LINES[lineNo][destNo].id,LINES[lineNo][destNo].name,destNo+1,LENGTH[lineNo]);
+  }
+  pulse(1,45,50,650);
+}
+>>>>>>> Stashed changes
 void encoderPress() {
   if(state==SELECT_LINE) {
     destNo=0;changeState(SELECT_DEST,"encoder_button");

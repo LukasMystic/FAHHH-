@@ -1,11 +1,15 @@
 """Fake ESP32 publisher for the FAHHH? dashboard.
 
-Publishes the topics and payloads defined in contracts/C3_mqtt.md so the
-dashboard can be built before the real firmware sends data.
+Publishes the topics and payloads defined in contracts/C3_mqtt.md (v3) so the
+dashboard can be tested before the real firmware sends data. It walks through
+the same route as William's sketch: choose line and destination, RFID
+checkpoint, wait for the train, board, arrive, alight, then starts again.
+Edge warnings, tilt advisories, sensor dropouts and (rarely) a help request
+happen at random along the way.
 
 Usage:
     python fake_publisher.py               # normal run, heartbeat every 2 s
-    python fake_publisher.py --fast        # heartbeat every 1 s
+    python fake_publisher.py --fast        # heartbeat every 1 s, journey runs faster
     python fake_publisher.py --dry-run     # print payloads, do not connect
     python fake_publisher.py --name gebi   # client id fahhh-fake-gebi
 """
@@ -21,18 +25,28 @@ from mqtt_common import DEVICE_ID, T_EVENTS, T_ONLINE, T_STATUS, load_config, ma
 STATUS_EVERY_S = 2
 CONNECT_TIMEOUT_S = 10
 
-# Candidate events from C3 (final list comes from C2): event -> (state, weight).
-# Weights keep the demo believable: emergencies and sensor errors are rare.
-EVENTS = {
-    "LEVEL_CHANGE": ("WARNING", 30),
-    "BOARDING_GAP": ("WARNING", 25),
-    "GUIDE_STEP": ("GUIDING", 30),
-    "ARRIVED_PLATFORM": ("NORMAL", 8),
-    "SENSOR_ERROR": ("ERROR", 4),
-    "EMERGENCY": ("EMERGENCY", 3),
+# Demo stations, same as the sketch (C3 v3)
+LINES = {
+    "A": ["A01", "A02", "A03", "A04", "A05", "A06"],
+    "B": ["B01", "B02", "B03", "B04"],
 }
-EVENT_CHANCE = 0.25        # chance of an event per heartbeat
-STATE_HOLD_BEATS = (1, 3)  # how many heartbeats a non-normal state lasts
+
+# Route steps: (state, how many heartbeats it lasts, event + source sent on entry)
+JOURNEY = [
+    ("SELECT_LINE", 3, None),
+    ("SELECT_DEST", 3, None),
+    ("SEEK_PLATFORM", 6, None),
+    ("WAIT_TRAIN", 6, ("CHECKPOINT", "RFID_PHYSICAL")),
+    ("WAIT_TRAIN", 3, ("SIM_TRAIN_NEAR", "POTENTIOMETER_BLE_STANDIN")),
+    ("ON_TRAIN", 10, ("BOARDING_CONFIRMED_BY_USER", "encoder_button")),
+    ("ARRIVING", 4, ("SIM_DESTINATION_APPROACH", "SERIAL_SIMULATED_TRAIN_TELEMETRY")),
+    ("COMPLETE", 4, ("ALIGHTING_CONFIRMED_BY_USER", "encoder_button")),
+]
+
+EDGE_CHANCE = 0.06       # per heartbeat, outside the train
+TILT_CHANCE = 0.03
+NO_ECHO_CHANCE = 0.03
+HELP_CHANCE = 0.004      # rare
 
 
 def connect(cfg, client_id, prefix):
@@ -64,6 +78,92 @@ def connect(cfg, client_id, prefix):
     return client
 
 
+class FakeCane:
+    """Holds the same variables the sketch reports in device/status."""
+
+    def __init__(self, publish):
+        self.publish = publish
+        self.start = time.time()
+        self.distance = 95.0      # cm to the ground, cane held normally
+        self.tilt = 20.0
+        self.edge = False
+        self.edge_beats = 0
+        self.no_echo_beats = 0
+        self.help = False
+        self.help_beats = 0
+        self.state = "SELECT_LINE"
+        self.station = ""
+        self.dest = ""
+        self.train_near = False
+
+    def uptime(self):
+        return int(time.time() - self.start)
+
+    def dist_value(self):
+        return -1 if self.no_echo_beats > 0 else round(self.distance)
+
+    def event(self, name, source):
+        self.publish(T_EVENTS, {
+            "device_id": DEVICE_ID, "uptime_s": self.uptime(), "event": name,
+            "state": self.state, "source": source, "distance_cm": self.dist_value(),
+        }, qos=1)
+
+    def change_state(self, new, source):
+        if new == self.state:
+            return
+        self.state = new
+        self.event(new, source)  # the sketch's changeState() also emits an event named after the state
+
+    def status(self):
+        self.publish(T_STATUS, {
+            "device_id": DEVICE_ID, "uptime_s": self.uptime(), "state": self.state,
+            "distance_cm": self.dist_value(), "tilt_deg": round(self.tilt),
+            "edge": int(self.edge), "train_near": int(self.train_near), "help": int(self.help),
+            "station": self.station, "dest": self.dest,
+        }, qos=0)
+
+    def sensors(self):
+        """Random walk for distance and tilt, plus random hazards."""
+        # drift back towards a normal grip (~25°) so a tilt advisory does not stick
+        self.tilt = min(80.0, max(5.0, self.tilt + (25 - self.tilt) * 0.25 + random.uniform(-4, 4)))
+        self.distance = min(140.0, max(70.0, self.distance + random.uniform(-6, 6)))
+
+        if self.no_echo_beats > 0:
+            self.no_echo_beats -= 1
+        elif random.random() < NO_ECHO_CHANCE:
+            self.no_echo_beats = random.randint(1, 2)
+
+        if self.edge:
+            self.edge_beats -= 1
+            if self.edge_beats <= 0:
+                self.edge = False
+                self.distance = random.uniform(85, 105)
+                self.event("EDGE_CLEAR", "HC_SR04")
+        elif self.state not in ("ON_TRAIN", "ARRIVING") and random.random() < EDGE_CHANCE:
+            self.edge = True
+            self.edge_beats = random.randint(1, 3)
+            self.distance = random.uniform(125, 140)  # ground drops away
+            self.event("EDGE_WARNING", "HC_SR04")
+
+        if random.random() < TILT_CHANCE:
+            self.tilt = random.uniform(66, 75)
+            self.event("CANE_TILT_ADVISORY", "MPU6050")
+
+    def maybe_help(self):
+        if self.help:
+            self.help_beats -= 1
+            if self.help_beats <= 0:
+                self.help = False
+                self.change_state("SELECT_LINE", "SERIAL_DEMO_RESET")
+                return True  # journey restarts
+        elif random.random() < HELP_CHANCE:
+            self.help = True
+            self.help_beats = 8
+            self.change_state("EMERGENCY", "physical_help_button_long_press")
+            self.event("HELP_REQUEST", "physical_help_button_long_press")
+        return False
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--name", default="stanley", help="your name, used in the client id")
@@ -84,49 +184,48 @@ def main():
         if client:
             client.publish(prefix + topic, text, qos=qos)
 
-    names = list(EVENTS)
-    weights = [EVENTS[n][1] for n in names]
-    start = time.time()
-    battery = 100.0
-    distance = 120.0
-    state, hold = "NORMAL", 0
-    low_battery_sent = False
+    cane = FakeCane(publish)
     print("Ctrl+C to stop.")
     try:
         while True:
-            uptime = int(time.time() - start)
-            battery = max(0.0, battery - random.uniform(0.05, 0.3))
-            distance = min(300.0, max(5.0, distance + random.uniform(-25, 25)))
+            line = random.choice(list(LINES))
+            stations = LINES[line]
+            start_i = random.randrange(0, len(stations) - 1)
+            dest_i = random.randrange(start_i + 1, len(stations))
+            cane.station, cane.dest, cane.train_near = "", "", False
+            restarted = False
 
-            if hold > 0:
-                hold -= 1
-                if hold == 0:
-                    state = "NORMAL"
-            elif random.random() < EVENT_CHANCE:
-                event = random.choices(names, weights)[0]
-                state = EVENTS[event][0]
-                hold = random.randint(*STATE_HOLD_BEATS) if state != "NORMAL" else 0
-                publish(T_EVENTS, {
-                    "device_id": DEVICE_ID, "uptime_s": uptime, "event": event, "state": state,
-                    "distance_cm": -1 if state == "ERROR" else round(distance),
-                    "battery": round(battery),
-                }, qos=1)
+            for state, beats, entry_event in JOURNEY:
+                if state == "SEEK_PLATFORM":
+                    cane.dest = stations[dest_i]
+                if entry_event and entry_event[0] == "CHECKPOINT":
+                    cane.station = stations[start_i]
+                if entry_event and entry_event[0] == "SIM_TRAIN_NEAR":
+                    cane.train_near = True
+                if state == "ON_TRAIN":
+                    cane.train_near = False
+                if state == "ARRIVING":
+                    cane.station = stations[dest_i]
 
-            if battery < 20 and not low_battery_sent:
-                low_battery_sent = True
-                publish(T_EVENTS, {
-                    "device_id": DEVICE_ID, "uptime_s": uptime, "event": "LOW_BATTERY", "state": state,
-                    "distance_cm": -1 if state == "ERROR" else round(distance),
-                    "battery": round(battery),
-                }, qos=1)
+                if not cane.help:
+                    # Same order as the sketch: checkpoint() sends CHECKPOINT before changing state;
+                    # boarding/arriving/alighting change state first, then send their event.
+                    source = entry_event[1] if entry_event else "encoder_button"
+                    if entry_event and entry_event[0] == "CHECKPOINT":
+                        cane.event(*entry_event)
+                    cane.change_state(state, source)
+                    if entry_event and entry_event[0] != "CHECKPOINT":
+                        cane.event(*entry_event)
 
-            publish(T_STATUS, {
-                "device_id": DEVICE_ID, "uptime_s": uptime, "state": state,
-                # while the sensor is in error there is no valid reading (C3: -1)
-                "distance_cm": -1 if state == "ERROR" else round(distance),
-                "battery": round(battery),
-            }, qos=0)
-            time.sleep(every)
+                for _ in range(beats):
+                    cane.sensors()
+                    if cane.maybe_help():
+                        restarted = True
+                        break
+                    cane.status()
+                    time.sleep(every)
+                if restarted:
+                    break
     except KeyboardInterrupt:
         print("\nstopping")
     finally:

@@ -1,6 +1,6 @@
 """MQTT subscriber for the FAHHH? dashboard.
 
-Subscribes to sic8/fahhh/device/# (contracts/C3_mqtt.md), checks every
+Subscribes to sic8/fahhh/device/# (contracts/C3_mqtt.md, v3), checks every
 message, keeps recent data in memory for the dashboard and appends every
 valid message to a CSV log (evidence for testing, report section 10/11).
 
@@ -19,7 +19,8 @@ from pathlib import Path
 from mqtt_common import DEVICE_ID, T_EVENTS, T_ONLINE, T_STATUS, load_config, make_client
 
 DATA_DIR = Path(__file__).parent / "data"
-CSV_FIELDS = ["received_at", "topic", "device_id", "uptime_s", "event", "state", "distance_cm", "battery"]
+CSV_FIELDS = ["received_at", "topic", "device_id", "uptime_s", "event", "state", "source", "distance_cm",
+              "tilt_deg", "edge", "train_near", "help", "station", "dest"]
 STALE_AFTER_S = 6  # no status for 3 heartbeats (2 s each) -> treat as no data
 
 
@@ -93,8 +94,20 @@ class TelemetryStore:
             }
 
 
+def _num(value):
+    """C3: numbers that are not available are sent as -1 (or missing)."""
+    if value is None:
+        return None
+    value = float(value)
+    return None if value < 0 else value
+
+
+def _flag(value):
+    return bool(int(value)) if value not in (None, "") else False
+
+
 def parse_payload(payload: bytes):
-    """Check a C3 JSON payload. The broker is public, so ignore anything that doesn't fit."""
+    """Check a C3 v3 JSON payload. The broker is public, so ignore anything that doesn't fit."""
     try:
         data = json.loads(payload.decode())
     except (UnicodeDecodeError, json.JSONDecodeError):
@@ -102,19 +115,22 @@ def parse_payload(payload: bytes):
     if not isinstance(data, dict) or data.get("device_id") != DEVICE_ID:
         return None
     try:
-        row = {
+        return {
             "device_id": data["device_id"],
             "uptime_s": int(data["uptime_s"]),
             "state": str(data["state"]).upper(),
-            "event": str(data["event"]).upper() if data.get("event") else "",
-            "distance_cm": float(data["distance_cm"]) if data.get("distance_cm") is not None else None,
-            "battery": int(data["battery"]),
+            "event": str(data.get("event") or "").upper(),
+            "source": str(data.get("source") or ""),
+            "distance_cm": _num(data.get("distance_cm")),
+            "tilt_deg": _num(data.get("tilt_deg")),
+            "edge": _flag(data.get("edge")),
+            "train_near": _flag(data.get("train_near")),
+            "help": _flag(data.get("help")),
+            "station": str(data.get("station") or "").upper(),
+            "dest": str(data.get("dest") or "").upper(),
         }
     except (KeyError, TypeError, ValueError):
         return None
-    if row["distance_cm"] is not None and row["distance_cm"] < 0:
-        row["distance_cm"] = None  # -1 = sensor error / no echo (C3)
-    return row
 
 
 def start_subscriber(store: TelemetryStore, client_id="fahhh-dash-stanley", verbose=False):

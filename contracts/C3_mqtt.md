@@ -5,7 +5,7 @@
 | **Owner** | Stanley |
 | **Used by** | William (firmware publishes), Stanley (dashboard subscribes) |
 | **Due** | Mon 26 Oct, 18:00 |
-| **Status** | DRAFT v2 — event names and P2 fields wait for C2 and the P2 scope decision |
+| **Status** | DRAFT v3 — names taken from William's sketch (commit `08a37ec`); waiting for William to confirm in C2 and for all four 👍 |
 
 Only the owner edits this file. Changes after publishing: `CONTRACT CHANGE C3` + 👍 from all four.
 
@@ -41,7 +41,7 @@ No dashboard → device commands in Stage 2 (e.g. *companion acknowledges emerge
 
 | Topic | Direction | When | QoS | Retained |
 |---|---|---|---|---|
-| `sic8/fahhh/device/events` | ESP32 → broker | On every event (state change, button) | 1 | no |
+| `sic8/fahhh/device/events` | ESP32 → broker | Every time the sketch calls `event()` | 1 | no |
 | `sic8/fahhh/device/status` | ESP32 → broker | Every 2 s (heartbeat) | 0 | no |
 | `sic8/fahhh/device/online` | ESP32 → broker | `"1"` after connect; `"0"` as Last Will | 1 | **yes** |
 
@@ -49,53 +49,87 @@ No dashboard → device commands in Stage 2 (e.g. *companion acknowledges emerge
 
 ## Payloads (JSON)
 
-Keep each message **under 256 bytes** (PubSubClient's default buffer) — compact JSON, no spaces needed.
+Keep each message **under 256 bytes** (PubSubClient's default buffer) — compact JSON, no spaces. Numbers that are not available (`NAN` in the sketch) are sent as `-1`.
 
 ### `device/events`
 
+One message per `event(name, source)` call in the sketch.
+
 ```json
-{"device_id":"unit-01","uptime_s":132,"event":"LEVEL_CHANGE","state":"WARNING","distance_cm":42,"battery":87}
+{"device_id":"unit-01","uptime_s":132,"event":"EDGE_WARNING","state":"WAIT_TRAIN","source":"HC_SR04","distance_cm":42}
 ```
 
 ### `device/status`
 
 ```json
-{"device_id":"unit-01","uptime_s":135,"state":"NORMAL","distance_cm":118,"battery":87}
+{"device_id":"unit-01","uptime_s":135,"state":"WAIT_TRAIN","distance_cm":118,"tilt_deg":12,"edge":0,"train_near":0,"help":0,"station":"A01","dest":"A06"}
 ```
 
-| Field | Type | In | Required | Notes |
+| Field | Type | In | Sketch variable | Notes |
 |---|---|---|---|---|
-| `device_id` | string | both | yes | `unit-01` for the demo |
-| `uptime_s` | int | both | yes | `millis()/1000`. No NTP needed; the dashboard stamps the receive time itself. |
-| `event` | string | events | yes | One of the event names below |
-| `state` | string | both | yes | Current state name from C2, `UPPER_SNAKE_CASE` |
-| `distance_cm` | number | both | if a distance sensor exists | Latest reading; `-1` = sensor error / no echo |
-| `battery` | int | both | yes | 0–100 (%). Simulated with a potentiometer in Wokwi. |
-| *(P2 fields)* | — | — | — | Added after the P2 scope is decided Mon 26 (e.g. `heading_deg`, `route_step`) |
+| `device_id` | string | both | — | `unit-01` for the demo |
+| `uptime_s` | int | both | `millis()/1000` | No NTP needed; the dashboard stamps the receive time itself |
+| `event` | string | events | `name` in `event()` | One of the event names below |
+| `state` | string | both | `stateName(state)` | One of the states below |
+| `source` | string | events | `source` in `event()` | What caused it, e.g. `HC_SR04`, `encoder_button`, `RFID_PHYSICAL` |
+| `distance_cm` | number | both | `distanceCm` | Tilt-corrected distance to the ground; `-1` = no valid reading |
+| `tilt_deg` | number | status | `tiltDeg` | Cane tilt from vertical; `-1` = MPU6050 not readable |
+| `edge` | 0/1 | status | `edge` | 1 while an edge warning is active |
+| `train_near` | 0/1 | status | `trainNear` | 1 while the door beacon (potentiometer stand-in) is near |
+| `help` | 0/1 | status | `help` | 1 while a help request is active |
+| `station` | string | status | `LINES[lineNo][currentNo].id` | Last RFID checkpoint, `""` if none yet |
+| `dest` | string | status | `LINES[lineNo][destNo].id` | Chosen destination, `""` before it is chosen |
+
+**Battery is not in C3 v3.** Nothing in the circuit measures or simulates it, so the team agreed to drop it rather than send a made-up value. (Needs the 👍 with this version.)
 
 **Rules for both sides**
-- The dashboard ignores fields it does not know and treats missing optional fields as empty — so adding a field never breaks anything.
-- Names: topics lowercase; JSON keys `snake_case`; `event` and `state` values `UPPER_SNAKE_CASE`.
+- The dashboard ignores fields it does not know and treats missing fields as empty, so adding a field never breaks anything.
+- Names: topics lowercase; JSON keys `snake_case`; `event` and `state` values `UPPER_SNAKE_CASE`, exactly as printed on Serial.
 
-## Event names
+## States (from the sketch)
 
-Final list comes from C2 (William). Current candidates:
+| State | Meaning |
+|---|---|
+| `SELECT_LINE` | User is choosing a line with the rotary knob |
+| `SELECT_DEST` | User is choosing the destination station |
+| `SEEK_PLATFORM` | Route set; waiting for an RFID checkpoint on the way to the platform |
+| `WAIT_TRAIN` | At the platform, waiting for the train |
+| `ON_TRAIN` | User confirmed boarding |
+| `ARRIVING` | Destination is near (simulated train telemetry or destination tag) |
+| `COMPLETE` | User confirmed alighting, or tapped the destination checkpoint |
+| `EMERGENCY` | Help button held for 3 s |
 
-| Event | Feature | Meaning |
+## Event names (from the sketch)
+
+| Event | Feature | When |
 |---|---|---|
-| `BOARDING_GAP` | P1 | Gap/step between platform and train detected |
-| `GUIDE_STEP` | P2 | Next guidance instruction given |
-| `ARRIVED_PLATFORM` | P2 | Route finished |
-| `LEVEL_CHANGE` | S1 | Drop-off / stairs / platform edge ahead |
-| `EMERGENCY` | S2 | Emergency button pressed |
-| `LOW_BATTERY` | — | Battery below threshold |
-| `SENSOR_ERROR` | — | Sensor gives no reading (abnormal test case) |
+| `EDGE_WARNING` | S1, P1 | Distance to the ground jumps by > 15 cm for 3 readings (edge or step ahead) |
+| `EDGE_CLEAR` | S1 | Distance back to normal for 0.7 s |
+| `CANE_TILT_ADVISORY` | S1 | Cane tilted more than 65° for 2 s |
+| `HELP_REQUEST` | S2 | Help button held for 3 s |
+| `CHECKPOINT` | P2 | An RFID station tag was read |
+| `SIM_TRAIN_NEAR` | P1 | Door beacon near while waiting (potentiometer stand-in or Serial `SIM TRAIN`) |
+| `BOARDING_CONFIRMED_BY_USER` | P1 | User pressed the knob after the train-near cue |
+| `SIM_DESTINATION_APPROACH` | P2 | Serial `SIM ARRIVE <id>` while on the train |
+| `ALIGHTING_CONFIRMED_BY_USER` | P1 | User pressed the knob while arriving |
+| *any state name* | — | `changeState()` also calls `event(<new state>)`, so every state change arrives as an event with the state's name |
+
+Sensor problems (ultrasonic no echo, MPU not readable) are **not** events; they show up in `device/status` as `distance_cm: -1` / `tilt_deg: -1`.
+
+## Demo stations (from the sketch)
+
+| Line | Stations |
+|---|---|
+| Demo A | A01 Jakarta Kota, A02 Jayakarta, A03 Mangga Besar, A04 Sawah Besar, A05 Juanda, A06 Gondangdia |
+| Demo B | B01 Tanah Abang, B02 Palmerah, B03 Kebayoran, B04 Pondok Ranji |
+
+The dashboard uses this list to show station names. If the sketch's list changes, this table changes with it.
 
 ## Test without the ESP32
 
-`dashboard/fake_publisher.py` publishes exactly these topics and payloads, so the dashboard can be built before the firmware is ready.
+`dashboard/fake_publisher.py` publishes exactly these topics and payloads, walking through the same route states as the sketch, so the dashboard can be tested before the firmware sends data.
 
-## Decisions in this draft (Stanley, Sun 25 Oct)
+## Decisions in this draft
 
 | Topic | Decision | Why |
 |---|---|---|
@@ -103,48 +137,68 @@ Final list comes from C2 (William). Current candidates:
 | Direction | One way (device → dashboard) | Smaller scope for 5 days; downlink is future work |
 | Heartbeat | Every 2 s | Live chart looks responsive in the demo video |
 | Time | `uptime_s` from the ESP32, dashboard stamps arrival time | No NTP code, one less failure point in Wokwi |
+| Names | States and events exactly as in William's sketch (v3, Tue 27) | The firmware is the source of truth; no renaming layer to keep in sync |
+| Battery | Dropped (v3) | Not measured or simulated anywhere in the circuit |
 
-## Reference: connecting the ESP32 in Wokwi (for William)
+## Reference: adding MQTT to the sketch (for William)
 
-Not part of the contract, just a starting point. Libraries: `PubSubClient`, `ArduinoJson` (add both in Wokwi's Library Manager).
+Not part of the contract, just a starting point. Library: `PubSubClient` (add `PubSubClient` to `libraries.txt`). No JSON library needed.
 
 ```cpp
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 #include <PubSubClient.h>
-#include "secrets.h"
+#include "secrets.h"   // WIFI_SSID, WIFI_PASSWORD, MQTT_HOST, MQTT_PORT
 
 WiFiClientSecure net;
 PubSubClient mqtt(net);
-
 const char* T_EVENTS = "sic8/fahhh/device/events";
 const char* T_STATUS = "sic8/fahhh/device/status";
 const char* T_ONLINE = "sic8/fahhh/device/online";
+unsigned long lastMqttTry = 0, lastMqttStatus = 0;
 
-void connectMqtt() {
-  if (WiFi.status() != WL_CONNECTED || mqtt.connected()) return;
-  // Last Will: broker publishes "0" (retained) if we drop off
-  // public broker: no username/password (nullptr)
-  if (mqtt.connect("fahhh-esp32-unit-01", nullptr, nullptr,
-                   T_ONLINE, 1, true, "0")) {
+// NAN -> -1 for JSON
+float j(float v) { return isfinite(v) ? v : -1; }
+
+void connectMqtt() {                       // call every loop; returns fast
+  if (mqtt.connected() || WiFi.status() != WL_CONNECTED) return;
+  if (millis() - lastMqttTry < 5000) return;  // retry at most every 5 s
+  lastMqttTry = millis();
+  if (mqtt.connect("fahhh-esp32-unit-01", nullptr, nullptr, T_ONLINE, 1, true, "0"))
     mqtt.publish(T_ONLINE, "1", true);
-  }
 }
 
-void setup() {
-  Serial.begin(115200);
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD, 6);   // Wokwi-GUEST, channel 6 connects faster
-  net.setInsecure();                          // demo only: skips certificate check
-  mqtt.setServer(MQTT_HOST, MQTT_PORT);
+// Call this at the end of event(name, source)
+void publishEvent(const char* name, const char* source) {
+  if (!mqtt.connected()) return;           // never block an alert on the network
+  char buf[256];
+  snprintf(buf, sizeof(buf),
+    "{\"device_id\":\"unit-01\",\"uptime_s\":%lu,\"event\":\"%s\",\"state\":\"%s\",\"source\":\"%s\",\"distance_cm\":%.0f}",
+    millis() / 1000, name, stateName(state), source, j(distanceCm));
+  mqtt.publish(T_EVENTS, buf);
 }
 
-void loop() {
-  // 1. read sensors + fire alerts FIRST (never wait for MQTT, P3)
-  // 2. then report:
-  connectMqtt();          // non-blocking: skip if no Wi-Fi
-  mqtt.loop();
-  // every 2 s: mqtt.publish(T_STATUS, json);   on event: mqtt.publish(T_EVENTS, json);
+// Call every loop; sends every 2 s
+void publishStatus() {
+  if (!mqtt.connected() || millis() - lastMqttStatus < 2000) return;
+  lastMqttStatus = millis();
+  const char* station = currentNo >= 0 ? LINES[lineNo][currentNo].id : "";
+  const char* dest = state >= SEEK_PLATFORM ? LINES[lineNo][destNo].id : "";
+  char buf[256];
+  snprintf(buf, sizeof(buf),
+    "{\"device_id\":\"unit-01\",\"uptime_s\":%lu,\"state\":\"%s\",\"distance_cm\":%.0f,\"tilt_deg\":%.0f,"
+    "\"edge\":%d,\"train_near\":%d,\"help\":%d,\"station\":\"%s\",\"dest\":\"%s\"}",
+    millis() / 1000, stateName(state), j(distanceCm), j(tiltDeg),
+    edge, trainNear, help, station, dest);
+  mqtt.publish(T_STATUS, buf);
 }
+
+// setup(): WiFi.begin(WIFI_SSID, WIFI_PASSWORD, 6); net.setInsecure(); mqtt.setServer(MQTT_HOST, MQTT_PORT);
+// loop(): after all service*() calls: connectMqtt(); mqtt.loop(); publishStatus();
 ```
 
-Notes: `connectMqtt()` must not loop or block, or alerts would wait for the network. Retry at most every few seconds (track `millis()`). `setInsecure()` is acceptable for the Wokwi demo; the report should mention that a real device would verify the broker's certificate and use a private broker with logins.
+Notes:
+- Sensors and alerts run first in `loop()`; MQTT comes after, so a slow network never delays a warning (P3).
+- `mqtt.connect()` itself can block for 1–3 s during the TLS handshake. That is why it only retries every 5 s. Mention this limitation in report 8.2; a real device would run MQTT in a separate FreeRTOS task.
+- `dest` is only sent from `SEEK_PLATFORM` onward, because before that the user is still choosing (the state order in the `enum` makes `state >= SEEK_PLATFORM` work, except `EMERGENCY`, which is last and also sends the chosen destination).
+- `setInsecure()` is acceptable for the Wokwi demo; the report should mention that a real device would verify the broker's certificate and use a private broker with logins.

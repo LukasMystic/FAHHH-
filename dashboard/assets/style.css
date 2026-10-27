@@ -53,7 +53,7 @@ body {
 .state .when { font-size: 13px; color: var(--label-2); margin-top: 4px; letter-spacing: -0.08px; }
 
 .NORMAL { color: var(--green); }
-.GUIDING { color: var(--blue); }
+.GUIDING, .INFO { color: var(--blue); }
 .WARNING { color: var(--orange); }
 .EMERGENCY { color: var(--red); }
 .ERROR, .NODATA { color: var(--gray); }

@@ -88,11 +88,11 @@ Broker: HiveMQ public broker `broker.hivemq.com:8883` (TLS, no login; team decis
 | ESP32 → broker | `sic8/fahhh/device/online` | `"1"` on connect, `"0"` as Last Will (retained) |
 
 ```json
-{ "device_id": "unit-01", "uptime_s": 132, "event": "LEVEL_CHANGE",
-  "state": "WARNING", "distance_cm": 42, "battery": 87 }
+{ "device_id": "unit-01", "uptime_s": 132, "event": "EDGE_WARNING",
+  "state": "WAIT_TRAIN", "source": "HC_SR04", "distance_cm": 42 }
 ```
 
-Candidate `event` values (William confirms in C2): `LEVEL_CHANGE` (S1), `BOARDING_GAP` (P1), `GUIDE_STEP` / `ARRIVED_PLATFORM` (P2), `EMERGENCY` (S2), `LOW_BATTERY`.
+States and event names are taken from the firmware (C3 v3): e.g. `EDGE_WARNING` (S1), `SIM_TRAIN_NEAR` / `BOARDING_CONFIRMED_BY_USER` (P1), `CHECKPOINT` (P2), `HELP_REQUEST` (S2). Full list in `contracts/C3_mqtt.md`.
 
 **C1 · Pin map** — draft lives in the team plan (`SIC8_Stage2_Team_Plan.docx`, section 2). Gebi confirms which parts actually exist in Wokwi.
 

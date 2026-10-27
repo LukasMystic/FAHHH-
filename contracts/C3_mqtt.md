@@ -13,7 +13,7 @@ Only the owner edits this file. Changes after publishing: `CONTRACT CHANGE C3` +
 
 MQTT **only reports**, one way: ESP32 → broker → dashboard. Every safety alert is decided and fired on the ESP32 first (P3). If Wi-Fi or the broker is down, alerts still work; MQTT messages are simply skipped.
 
-All Wi-Fi and MQTT work runs in its own FreeRTOS task, separate from the sensor and alert loop; the loop only hands JSON to a queue without waiting. The aim is that connecting or a slow network does not hold up a reading or an alert. **Measured in the connectivity test sketch** (Tue 27 Oct, `tests/results/2026-10-27_wokwi-connectivity.md`): `loopMaxMs` stayed 1–3 ms during 6–7 s TLS connects. Still to be confirmed inside the full firmware (test T7) before the report claims it for the cane.
+All Wi-Fi and MQTT work runs in its own FreeRTOS task, separate from the sensor and alert loop; the loop only hands JSON to a queue without waiting. The aim is that connecting or a slow network does not hold up a reading or an alert. **Measured in the connectivity test sketch** (Tue 27 Oct, `tests/results/2026-10-27_wokwi-connectivity.md`): `loopMaxMs` stayed 1–3 ms during 6–7 s TLS connects. Still to be confirmed inside the full firmware (test T7b) before the report claims it for the cane.
 
 No dashboard → device commands in Stage 2 (e.g. *companion acknowledges emergency*). That goes to report section 14, Pengembangan Lanjutan.
 
@@ -154,8 +154,8 @@ The dashboard uses this list to show station names. If the sketch's list changes
 | Names | States and events exactly as in William's sketch and C2 (v3, Tue 27). The "proposed mapping" to old names in C2 is not used | The firmware is the source of truth; no renaming layer to keep in sync |
 | Battery | Dropped (v3) | Not measured or simulated anywhere in the circuit |
 | QoS | 0 for all publishes, Last Will at QoS 1 (v3, PR #6 review) | PubSubClient can only publish at QoS 0; the status heartbeat repeats the current state |
-| Network task | Wi-Fi/MQTT in a separate FreeRTOS task on core 0 (v3, PR #6 review) | A blocking connect must not delay sensor readings or alerts; measured in the test sketch, firmware still to confirm (T7) |
-| Keep-alive | `mqtt.setKeepAlive(30)` (connectivity test, Tue 27) | Wokwi slows down when its tab is in the background; with the 15 s default the broker dropped the cane once |
+| Network task | Wi-Fi/MQTT in a separate FreeRTOS task on core 0 (v3, PR #6 review) | A blocking connect must not delay sensor readings or alerts; measured in the test sketch, firmware still to confirm (T7b) |
+| Keep-alive | `mqtt.setKeepAlive(30)`, **proposed** after the connectivity test (Tue 27); **not tested yet** | During that test Wokwi slowed down in a background tab and, with the 15 s default, the broker dropped the cane once. To be verified in the firmware run (T7a/T7b) |
 
 ## Reference: adding MQTT to the sketch (for William)
 
@@ -232,7 +232,7 @@ void mqttTask(void*) {
   mqtt.setServer(MQTT_HOST, MQTT_PORT);
   mqtt.setBufferSize(384);                   // header + topic + JSON must fit (default 256)
   mqtt.setSocketTimeout(5);                  // default 15 s
-  mqtt.setKeepAlive(30);                     // default 15 s; survives short Wokwi slowdowns
+  mqtt.setKeepAlive(30);                     // default 15 s; proposed for Wokwi slowdowns, not tested yet
   TxMessage m{};
   unsigned long lastTry = millis() - 5000UL;
   unsigned long wifiSince = millis();         // start of the current Wi-Fi join attempt
@@ -279,7 +279,7 @@ void startMqttTask() {
 ```
 
 Notes:
-- **Measured in the test sketch, not yet in the firmware.** `tests/connectivity/sketch.ino` runs this pattern (with the Wi-Fi fix, but without `setKeepAlive(30)`, which was added after that run): TLS connect took 6.0–7.3 s and `loopMaxMs` stayed 1–3 ms (`tests/results/2026-10-27_wokwi-connectivity.md`). The firmware does more work in `loop()`, so repeat the measurement there (test T7): print the longest `loop()` duration (`loopMaxMs`) in the 5 s Serial status, with the broker connected and while it is unreachable, and put those numbers in report 8.2.
+- **Measured in the test sketch, not yet in the firmware.** `tests/connectivity/sketch.ino` runs this pattern (with the Wi-Fi fix, but without `setKeepAlive(30)`, which was added after that run): TLS connect took 6.0–7.3 s and `loopMaxMs` stayed 1–3 ms (`tests/results/2026-10-27_wokwi-connectivity.md`). The firmware does more work in `loop()`, so repeat the measurement there (test T7b): print the longest `loop()` duration (`loopMaxMs`) in the 5 s Serial status, with the broker connected and while it is unreachable, and put those numbers in report 8.2.
 - Keep the Wokwi tab visible while testing: a background tab slows the simulation and can trigger a disconnect.
 - If Wokwi does not run the second task properly, say so in the report instead of claiming non-blocking behaviour.
 - `dest` is only sent from `SEEK_PLATFORM` onward, because before that the user is still choosing (the `enum` order makes `state >= SEEK_PLATFORM` work; `EMERGENCY` is last and also sends the chosen destination).

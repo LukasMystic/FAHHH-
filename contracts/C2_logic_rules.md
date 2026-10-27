@@ -5,43 +5,43 @@
 | **Owner** | William |
 | **Used by** | Kezia, Stanley |
 | **Due** | Mon 26 Oct, 18:00 |
-| **Status** | DRAFT, menunggu persetujuan empat anggota |
+| **Status** | DRAFT, pending approval from all four members |
 
-Hanya William yang mengedit file ini. Setelah diterbitkan sebagai kontrak final, perubahan memerlukan `CONTRACT CHANGE C2` dan 👍 dari keempat anggota.
+Only William edits this file. Once C2 is published as a final contract, any change requires `CONTRACT CHANGE C2` and 👍 from all four members.
 
-Aturan ini mengikuti `firmware/c1_aligned/sketch.ino` versi usulan. Sketch tersebut lolos pemeriksaan sintaks lokal, tetapi belum diuji ulang di Wokwi. Kolom MQTT di bawah adalah **pemetaan usulan untuk C3**, bukan event yang sudah dikirim oleh ESP32.
+These rules describe William's firmware draft. They must be checked against `firmware/sketch.ino` in the separate firmware PR. The draft passed a local syntax check but has not been retested in Wokwi. The MQTT column below is a **proposed mapping for C3**, not events currently published by the ESP32.
 
 ## States
 
 | State | Feature | Condition / threshold | Output (pattern) | MQTT event |
 |---|---|---|---|---|
-| `SELECT_LINE` | P2 | Awal perangkat atau reset; putar rotary untuk memilih Demo A/B, tekan singkat untuk lanjut | Serial `MENU line`; 1 bunyi pendek saat pilihan berubah | Belum ada |
-| `SELECT_DEST` | P2 | Putar rotary untuk memilih stasiun dalam jalur demo; tekan singkat untuk mengunci tujuan | Serial `MENU destination`; 1 bunyi pendek saat pilihan berubah | Belum ada |
-| `SEEK_PLATFORM` | P2 | Tujuan dikunci; menunggu tag RFID terdaftar atau `SIM TAG <ID>` | Serial `ROUTE`, lalu `RFID_CHECKPOINT` dan `CHECKPOINT` saat tag terbaca | Usulan `GUIDE_STEP`; `ARRIVED_PLATFORM` belum dapat diklaim karena tag belum membuktikan peron |
-| `WAIT_TRAIN` | P2/P1 | Tag RFID terdaftar selain tujuan. Potensiometer beacon dianggap dekat jika ADC >2600 dan dianggap menjauh jika ADC ≤2100. Tekan rotary setelah pengguna mengonfirmasi naik | 2 bunyi pendek saat masuk; `SIM_TRAIN_NEAR` dan 3 bunyi pendek ketika dekat; `BOARDING_CONFIRMED_BY_USER` setelah konfirmasi | `BOARDING_GAP` **belum tersedia**: celah atau undakan peron-kereta belum diukur |
-| `ON_TRAIN` | P1 | Konfirmasi naik dari `WAIT_TRAIN`; `SIM ARRIVE <ID>` yang cocok dengan tujuan atau tag tujuan dalam demo memicu tahap berikutnya | 2 bunyi sedang saat naik; sumber kedatangan diberi label simulasi di Serial | `BOARDING_GAP` **belum tersedia** |
-| `ARRIVING` | P1 | Sinyal kedatangan simulasi cocok dengan tujuan; tekan rotary setelah pengguna mengonfirmasi turun | `SIM_DESTINATION_APPROACH` jika lewat `SIM ARRIVE`; 3 bunyi sedang; lalu `ALIGHTING_CONFIRMED_BY_USER` | Belum ada event kedatangan nyata; sumber masih simulasi |
-| `COMPLETE` | P1/P2 | Konfirmasi turun, atau tag tujuan terbaca saat `SEEK_PLATFORM` dalam demo | 3 bunyi pendek; status akhir di Serial | Belum ada |
-| Semua state, tanpa mengubah state perjalanan | S1/P3 | HC-SR04: jarak > baseline +15 cm dan >25 cm selama 3 bacaan berturut-turut, tiap 120 ms. Aman kembali setelah 700 ms bacaan valid. Koreksi `jarak × cos(sudut MPU)` jika sudut ≤65°; jika MPU tidak valid, pakai jarak mentah dan baseline mentah terpisah | `EDGE_WARNING` dan 1 bunyi panjang; `EDGE_CLEAR` saat aman. Kehilangan echo memicu `EDGE_SENSOR_FAULT`; kegagalan MPU memicu `MPU_FAULT_RAW_FALLBACK`. Peringatan lama tidak hilang hanya karena sensor gagal | Usulan `LEVEL_CHANGE` untuk `EDGE_WARNING`; belum dipublish |
-| `EMERGENCY` | S2/P3 | Tombol bantuan LOW stabil 40 ms lalu ditahan 3 detik dari state mana pun; terkunci sampai `ACK HELP` khusus demo | `HELP_REQUEST`, pola 4 bunyi bernada tinggi; status bantuan lokal aktif tanpa Wi-Fi | Usulan `EMERGENCY`; belum dipublish dan belum berarti bantuan diterima |
-| Belum ada state/aturan | P1 | Pengukuran celah atau undakan peron-kereta belum diimplementasikan | Tidak ada klaim keselamatan celah | `BOARDING_GAP` belum boleh dikirim sebagai pengukuran nyata |
-| Belum ada state/aturan | Baterai | Tidak ada sensor atau pembacaan tegangan baterai | Tidak ada | `LOW_BATTERY` belum boleh dikirim |
+| `SELECT_LINE` | P2 | At startup or after reset, rotate the encoder to choose Demo A/B; short press to continue | Serial `MENU line`; one short beep when the selection changes | None yet |
+| `SELECT_DEST` | P2 | Rotate the encoder to choose a station on the demo line; short press to confirm the destination | Serial `MENU destination`; one short beep when the selection changes | None yet |
+| `SEEK_PLATFORM` | P2 | Destination confirmed; wait for a registered RFID tag or `SIM TAG <ID>` | Serial `ROUTE`, then `RFID_CHECKPOINT` and `CHECKPOINT` when a tag is read | Proposed `GUIDE_STEP`; `ARRIVED_PLATFORM` cannot be claimed because the tag does not verify the platform |
+| `WAIT_TRAIN` | P2/P1 | A registered RFID tag other than the destination is read. Simulated beacon becomes near at ADC >2600 and far at ADC ≤2100. User presses the encoder after confirming boarding | Two short beeps on entry; `SIM_TRAIN_NEAR` and three short beeps when near; `BOARDING_CONFIRMED_BY_USER` after confirmation | `BOARDING_GAP` **unavailable**: the train-platform gap or step is not measured |
+| `ON_TRAIN` | P1 | Boarding confirmed from `WAIT_TRAIN`; matching `SIM ARRIVE <ID>` or a destination tag in the demo triggers the next state | Two medium beeps on boarding; Serial labels the arrival source as simulated | `BOARDING_GAP` **unavailable** |
+| `ARRIVING` | P1 | Simulated arrival matches the destination; user presses the encoder after confirming alighting | `SIM_DESTINATION_APPROACH` when triggered by `SIM ARRIVE`; three medium beeps; then `ALIGHTING_CONFIRMED_BY_USER` | No real arrival event; the input remains simulated |
+| `COMPLETE` | P1/P2 | Alighting confirmed, or a destination tag is read in `SEEK_PLATFORM` in the demo | Three short beeps; final state in Serial | None yet |
+| Any state, without changing the travel state | S1/P3 | HC-SR04: distance > baseline +15 cm and >25 cm for three consecutive readings, sampled every 120 ms. Clear after 700 ms of valid non-jump readings. Use `distance × cos(MPU angle)` when the angle is ≤65°; otherwise use raw distance and a separate raw baseline | `EDGE_WARNING` and one long beep; `EDGE_CLEAR` when safe. Missing echo triggers `EDGE_SENSOR_FAULT`; MPU failure triggers `MPU_FAULT_RAW_FALLBACK`. A sensor failure does not silently clear an active warning | Proposed `LEVEL_CHANGE` for `EDGE_WARNING`; not published yet |
+| `EMERGENCY` | S2/P3 | Help button remains LOW for 40 ms debounce, then is held for 3 seconds from any state; latched until demo-only `ACK HELP` | `HELP_REQUEST`, four high-pitched beeps; local help status remains active without Wi-Fi | Proposed `EMERGENCY`; not published yet and does not prove that help was received |
+| No state/rule yet | P1 | Train-platform gap or step measurement is not implemented | No gap safety claim | `BOARDING_GAP` must not be sent as a real measurement |
+| No state/rule yet | Battery | No battery voltage sensor or reading | None | `LOW_BATTERY` must not be sent |
 
-Perpindahan utama: `SELECT_LINE` → `SELECT_DEST` → `SEEK_PLATFORM` → `WAIT_TRAIN` → `ON_TRAIN` → `ARRIVING` → `COMPLETE`. Dari `SEEK_PLATFORM`, tag tujuan bisa langsung menuju `COMPLETE` hanya dalam demo. Tombol bantuan membawa state apa pun ke `EMERGENCY`. Tekan rotary lebih dari 1,2 detik mengulang menu jika darurat tidak aktif; `ACK HELP` lewat Serial hanya mereset demo.
+Main transitions: `SELECT_LINE` → `SELECT_DEST` → `SEEK_PLATFORM` → `WAIT_TRAIN` → `ON_TRAIN` → `ARRIVING` → `COMPLETE`. In the demo, a destination tag in `SEEK_PLATFORM` can go directly to `COMPLETE`. The help button moves any state to `EMERGENCY`. Holding the encoder for more than 1.2 seconds resets the menu when help is not active. Serial `ACK HELP` resets the demo only.
 
 ## Alert language
 
 | Pattern | Meaning |
 |---|---|
-| 1 bunyi pendek, 650 Hz, 45 ms | Pilihan rotary berpindah; konfirmasi navigasi biasa |
-| 2 bunyi pendek, 700 Hz, 100 ms | Titik RFID dikenali dan alur masuk `WAIT_TRAIN` |
-| 3 bunyi pendek, 900 Hz, 100 ms | Beacon **simulasi** memberi petunjuk kereta dekat; pengguna tetap memverifikasi jalur dan arah |
-| 1 bunyi panjang, 1200 Hz, 700 ms | Bahaya tepi atau gangguan sensor yang memerlukan kewaspadaan |
-| 2 bunyi, 750 Hz, 220 ms | Kemiringan tongkat >65° selama 2 detik; `CANE_TILT_ADVISORY` |
-| 4 bunyi, 1600 Hz, 250 ms | Permintaan bantuan lokal aktif; `HELP_REQUEST` |
+| One short beep, 650 Hz, 45 ms | Rotary selection changed; ordinary navigation feedback |
+| Two short beeps, 700 Hz, 100 ms | RFID checkpoint recognized and state changed to `WAIT_TRAIN` |
+| Three short beeps, 900 Hz, 100 ms | **Simulated** beacon indicates a nearby train; the user must still verify its line and direction |
+| One long beep, 1200 Hz, 700 ms | Edge hazard or sensor fault requiring caution |
+| Two beeps, 750 Hz, 220 ms | Cane angle >65° for 2 seconds; `CANE_TILT_ADVISORY` |
+| Four beeps, 1600 Hz, 250 ms | Local help request active; `HELP_REQUEST` |
 
-Prioritas: peringatan tepi/gangguan sensor dapat memotong bunyi bantuan, lalu bunyi bantuan berlanjut. Bunyi navigasi biasa tidak menimpa peringatan bahaya atau bantuan. LED pada Wokwi mewakili keluaran getar, tetapi belum ada motor getar maupun suara yang menyebut nama stasiun.
+Priority: an edge hazard or sensor fault can interrupt the help pattern, which resumes afterward. Ordinary navigation cues do not override hazard or help cues. The Wokwi LED stands in for vibration output; the demo has no vibration motor or spoken station names.
 
-**Aturan P3:** keputusan peringatan keselamatan S1 dibuat di ESP32 dan tidak menunggu Wi-Fi/MQTT. Aturan yang sama wajib berlaku untuk P1 setelah pengukuran celah diimplementasikan. Tombol bantuan S2 juga memicu bunyi lokal tanpa koneksi. Ketika C3 disepakati, Stanley dan William perlu menetapkan payload, sumber waktu, dan pemetaan event sebelum MQTT diaktifkan.
+**P3 rule:** S1 safety alerts are decided on the ESP32 and never wait for Wi-Fi/MQTT. The same rule must apply to P1 once gap measurement is implemented. The S2 help button also produces a local cue without a connection. Before enabling MQTT, Stanley and William must agree on the C3 payload, timestamp source, and event mapping.
 
-**Label simulasi:** potensiometer mewakili RSSI BLE, `SIM ARRIVE` mewakili telemetri kereta, dan `SIM TAG` mewakili pembacaan RFID melalui Serial. RFID fisik hanya membuktikan tag terdaftar terbaca; tag tidak membuktikan peron atau kereta yang benar. Menu saat ini hanya menampilkan nama stasiun di Serial, sehingga belum dapat dipakai mandiri oleh pengguna tunanetra.
+**Simulation labels:** the potentiometer stands in for BLE RSSI; `SIM ARRIVE` stands in for train telemetry; and `SIM TAG` stands in for an RFID read through Serial. A physical RFID read only proves that a registered tag was seen. It does not verify the platform or train. Station names are currently shown only in Serial, so the menu is not yet independently usable by a blind passenger.

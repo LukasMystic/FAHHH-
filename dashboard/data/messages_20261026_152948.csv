@@ -1,0 +1,3 @@
+received_at,topic,device_id,uptime_s,event,state,distance_cm,battery
+2026-10-26T15:29:49,device/online,,,,OFFLINE,,
+2026-10-26T15:32:23,device/online,,,,OFFLINE,,

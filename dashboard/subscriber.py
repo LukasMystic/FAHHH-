@@ -73,7 +73,9 @@ class TelemetryStore:
             if topic_suffix == T_STATUS:
                 self.status.append(row)
                 self.last_status_at = now
-                self.online = True if self.online is None else self.online
+                # A fresh, valid status proves the cane is alive, even after a
+                # retained or Last Will "0" on device/online.
+                self.online = True
             elif topic_suffix == T_EVENTS:
                 self.events.append(row)
         self._log(topic_suffix, row)

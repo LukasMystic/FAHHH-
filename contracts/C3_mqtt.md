@@ -13,6 +13,8 @@ Only the owner edits this file. Changes after publishing: `CONTRACT CHANGE C3` +
 
 MQTT **only reports**, one way: ESP32 → broker → dashboard. Every safety alert is decided and fired on the ESP32 first (P3). If Wi-Fi or the broker is down, alerts still work; MQTT messages are simply skipped.
 
+All Wi-Fi and MQTT work runs in its own FreeRTOS task, separate from the sensor and alert loop, so connecting or a slow network does not hold up a reading or an alert. This still has to be measured in Wokwi before the report states it (see the notes under the reference code).
+
 No dashboard → device commands in Stage 2 (e.g. *companion acknowledges emergency*). That goes to report section 14, Pengembangan Lanjutan.
 
 ## Broker
@@ -41,11 +43,21 @@ No dashboard → device commands in Stage 2 (e.g. *companion acknowledges emerge
 
 | Topic | Direction | When | QoS | Retained |
 |---|---|---|---|---|
-| `sic8/fahhh/device/events` | ESP32 → broker | Every time the sketch calls `event()` | 1 | no |
+| `sic8/fahhh/device/events` | ESP32 → broker | Every time the sketch calls `event()` | 0 | no |
 | `sic8/fahhh/device/status` | ESP32 → broker | Every 2 s (heartbeat) | 0 | no |
-| `sic8/fahhh/device/online` | ESP32 → broker | `"1"` after connect; `"0"` as Last Will | 1 | **yes** |
+| `sic8/fahhh/device/online` | ESP32 → broker | `"1"` after connect (QoS 0); `"0"` as Last Will (QoS 1) | 0 / 1 | **yes** |
 
-`device/online` lets the dashboard show *device offline* when Wokwi stops or Wi-Fi drops (useful for an abnormal test scenario).
+`device/online` lets the dashboard show *device offline* when Wokwi stops or Wi-Fi drops (useful for an abnormal test scenario). A fresh `device/status` also counts as online, so a stale `"0"` never hides live data.
+
+### Delivery: QoS 0, and what that means
+
+The firmware uses PubSubClient, which [can only publish at QoS 0](https://github.com/knolleary/pubsubclient#limitations). Only the Last Will is sent at QoS 1. So:
+
+- An event can be **lost** if the connection drops at that moment, and events are dropped (not queued) while the cane is offline. The dashboard's event list can have gaps.
+- The **current situation is not lost**: every 2 s `device/status` repeats the state and the `edge` and `help` flags. After a lost event or a reconnect, the dashboard shows the right state again within one heartbeat.
+- Safety never depends on delivery: the cane has already sounded the alert locally (P3). MQTT only tells the companion.
+
+The report (8.2) must describe it this way and must not promise guaranteed event delivery. QoS 1 publishing would need another library (e.g. `espMqttClient`); listed as future work in section 14.
 
 ## Payloads (JSON)
 
@@ -141,6 +153,8 @@ The dashboard uses this list to show station names. If the sketch's list changes
 | Time | `uptime_s` from the ESP32, dashboard stamps arrival time | No NTP code, one less failure point in Wokwi |
 | Names | States and events exactly as in William's sketch and C2 (v3, Tue 27). The "proposed mapping" to old names in C2 is not used | The firmware is the source of truth; no renaming layer to keep in sync |
 | Battery | Dropped (v3) | Not measured or simulated anywhere in the circuit |
+| QoS | 0 for all publishes, Last Will at QoS 1 (v3, PR #6 review) | PubSubClient can only publish at QoS 0; the status heartbeat repeats the current state |
+| Network task | Wi-Fi/MQTT in a separate FreeRTOS task on core 0 (v3, PR #6 review) | A blocking connect must not delay sensor readings or alerts; to be measured in Wokwi |
 
 ## Reference: adding MQTT to the sketch (for William)
 

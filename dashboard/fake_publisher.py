@@ -7,11 +7,19 @@ checkpoint, wait for the train, board, arrive, alight, then starts again.
 Edge warnings, tilt advisories, sensor dropouts and (rarely) a help request
 happen at random along the way.
 
+It follows the C2 rules: an edge warning only clears after a valid distance
+reading, and a help request stays active (EMERGENCY) until an explicit
+ACK HELP demo reset, which this script only does when asked to.
+Like the firmware (PubSubClient), it publishes at QoS 0; only the Last Will is QoS 1.
+
 Usage:
-    python fake_publisher.py               # normal run, heartbeat every 2 s
-    python fake_publisher.py --fast        # heartbeat every 1 s, journey runs faster
-    python fake_publisher.py --dry-run     # print payloads, do not connect
-    python fake_publisher.py --name gebi   # client id fahhh-fake-gebi
+    python fake_publisher.py                      # normal run, heartbeat every 2 s
+    python fake_publisher.py --fast               # heartbeat every 1 s, journey runs faster
+    python fake_publisher.py --dry-run            # print payloads, do not connect
+    python fake_publisher.py --name gebi          # client id fahhh-fake-gebi
+    python fake_publisher.py --help-at 20         # press help 20 s after start (test scenario)
+    python fake_publisher.py --ack-help-after 30  # simulate someone typing ACK HELP 30 s later
+    python fake_publisher.py --no-random-help     # no random help requests
 """
 
 import argparse
@@ -61,7 +69,8 @@ def connect(cfg, client_id, prefix):
             print(f"[mqtt] connect failed: {reason_code}")
             return
         print(f"[mqtt] connected to {cfg['host']}:{cfg['port']} as {client_id}")
-        c.publish(prefix + T_ONLINE, "1", qos=1, retain=True)
+        # PubSubClient can only publish at QoS 0 (C3); retained still works
+        c.publish(prefix + T_ONLINE, "1", qos=0, retain=True)
         connected.set()
 
     def on_disconnect(c, userdata, flags, reason_code, properties):
@@ -92,7 +101,7 @@ class FakeCane:
         self.no_echo_beats = 0
         self.mpu_fault_beats = 0
         self.help = False
-        self.help_beats = 0
+        self.help_since = None
         self.state = "SELECT_LINE"
         self.station = ""
         self.dest = ""
@@ -108,7 +117,7 @@ class FakeCane:
         self.publish(T_EVENTS, {
             "device_id": DEVICE_ID, "uptime_s": self.uptime(), "event": name,
             "state": self.state, "source": source, "distance_cm": self.dist_value(),
-        }, qos=1)
+        }, qos=0)  # PubSubClient: QoS 0 only (C3)
 
     def change_state(self, new, source):
         if new == self.state:
@@ -144,11 +153,13 @@ class FakeCane:
 
         if self.edge:
             self.edge_beats -= 1
-            if self.edge_beats <= 0:
+            # C2: a sensor fault never clears an active warning; only a valid reading does
+            if self.edge_beats <= 0 and self.no_echo_beats == 0:
                 self.edge = False
                 self.distance = random.uniform(85, 105)
                 self.event("EDGE_CLEAR", "HC_SR04")
-        elif self.state not in ("ON_TRAIN", "ARRIVING") and random.random() < EDGE_CHANCE:
+        elif (self.no_echo_beats == 0 and self.state not in ("ON_TRAIN", "ARRIVING")
+              and random.random() < EDGE_CHANCE):
             self.edge = True
             self.edge_beats = random.randint(1, 3)
             self.distance = random.uniform(125, 140)  # ground drops away
@@ -158,19 +169,18 @@ class FakeCane:
             self.tilt = random.uniform(66, 75)
             self.event("CANE_TILT_ADVISORY", "MPU6050")
 
-    def maybe_help(self):
-        if self.help:
-            self.help_beats -= 1
-            if self.help_beats <= 0:
-                self.help = False
-                self.change_state("SELECT_LINE", "SERIAL_DEMO_RESET")
-                return True  # journey restarts
-        elif random.random() < HELP_CHANCE:
-            self.help = True
-            self.help_beats = 8
-            self.change_state("EMERGENCY", "physical_help_button_long_press")
-            self.event("HELP_REQUEST", "physical_help_button_long_press")
-        return False
+    def press_help(self):
+        self.help = True
+        self.help_since = time.time()
+        self.change_state("EMERGENCY", "physical_help_button_long_press")
+        self.event("HELP_REQUEST", "physical_help_button_long_press")
+
+    def ack_help(self):
+        """Same as typing ACK HELP in the sketch's Serial Monitor: a demo reset, not proof help arrived."""
+        print("[sim] ACK HELP typed: demo reset as in C2 (not proof that help arrived)")
+        self.help = False
+        self.help_since = None
+        self.change_state("SELECT_LINE", "SERIAL_DEMO_RESET")
 
 
 def main():
@@ -178,6 +188,12 @@ def main():
     parser.add_argument("--name", default="stanley", help="your name, used in the client id")
     parser.add_argument("--fast", action="store_true", help="heartbeat every 1 s")
     parser.add_argument("--dry-run", action="store_true", help="print payloads only")
+    parser.add_argument("--help-at", type=float, metavar="SEC",
+                        help="press the help button this many seconds after start")
+    parser.add_argument("--ack-help-after", type=float, metavar="SEC",
+                        help="simulate ACK HELP this many seconds after a help request "
+                             "(default: help stays active until you stop the script)")
+    parser.add_argument("--no-random-help", action="store_true", help="never press help at random")
     args = parser.parse_args()
 
     cfg = load_config()
@@ -194,6 +210,8 @@ def main():
             client.publish(prefix + topic, text, qos=qos)
 
     cane = FakeCane(publish)
+    started = time.time()
+    help_done = False
     print("Ctrl+C to stop.")
     try:
         while True:
@@ -216,20 +234,30 @@ def main():
                 if state == "ARRIVING":
                     cane.station = stations[dest_i]
 
-                if not cane.help:
-                    # Same order as the sketch: checkpoint() sends CHECKPOINT before changing state;
-                    # boarding/arriving/alighting change state first, then send their event.
-                    source = entry_event[1] if entry_event else "encoder_button"
-                    if entry_event and entry_event[0] == "CHECKPOINT":
-                        cane.event(*entry_event)
-                    cane.change_state(state, source)
-                    if entry_event and entry_event[0] != "CHECKPOINT":
-                        cane.event(*entry_event)
+                # Same order as the sketch: checkpoint() sends CHECKPOINT before changing state;
+                # boarding/arriving/alighting change state first, then send their event.
+                source = entry_event[1] if entry_event else "encoder_button"
+                if entry_event and entry_event[0] == "CHECKPOINT":
+                    cane.event(*entry_event)
+                cane.change_state(state, source)
+                if entry_event and entry_event[0] != "CHECKPOINT":
+                    cane.event(*entry_event)
 
                 for _ in range(beats):
                     cane.sensors()
-                    if cane.maybe_help():
-                        restarted = True
+                    if (args.help_at is not None and not help_done and time.time() - started >= args.help_at) \
+                            or (not args.no_random_help and random.random() < HELP_CHANCE):
+                        help_done = True
+                        cane.press_help()
+                    if cane.help:
+                        # C2: EMERGENCY is latched. The journey pauses; sensors and status keep going.
+                        while cane.help:
+                            cane.status()
+                            time.sleep(every)
+                            cane.sensors()
+                            if args.ack_help_after is not None and time.time() - cane.help_since >= args.ack_help_after:
+                                cane.ack_help()
+                        restarted = True  # the sketch restarts at SELECT_LINE after ACK HELP
                         break
                     cane.status()
                     time.sleep(every)
@@ -239,7 +267,7 @@ def main():
         print("\nstopping")
     finally:
         if client:
-            client.publish(prefix + T_ONLINE, "0", qos=1, retain=True).wait_for_publish(2)
+            client.publish(prefix + T_ONLINE, "0", qos=0, retain=True).wait_for_publish(2)
             client.disconnect()
             client.loop_stop()
 

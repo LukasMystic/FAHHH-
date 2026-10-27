@@ -16,11 +16,12 @@ Sumber perilaku yang diharapkan: C2 (aturan logika, William) dan C3 v3 (MQTT, St
 | T4 | S1 Tongkat terlalu miring (MPU6050) | Abnormal |
 | T5 | S2 Tombol darurat + bahaya tepi saat darurat | Abnormal |
 | T6 | S2 Tombol darurat ditekan singkat (< 3 s) | Abnormal |
-| T7 | P3 Koneksi terputus (alarm tetap lokal) | Abnormal |
-| T8 | Keamanan broker publik: pesan asing/rusak | Abnormal |
+| T7a | P3 Tongkat terputus: Last Will dan pemulihan dashboard | Abnormal |
+| T7b | P3 Broker tidak terjangkau: alarm tetap lokal | Abnormal |
+| T8 | Dashboard mengabaikan pesan rusak atau asing (bukan uji keamanan) | Abnormal |
 | T9 | Kartu RFID tidak terdaftar | Abnormal |
 
-Minimal yang wajib (guideline): 3 skenario, termasuk abnormal. Jika waktu sempit, prioritas: **T1, T3, T5, T7**.
+Minimal yang wajib (guideline): 3 skenario, termasuk abnormal. Jika waktu sempit, prioritas: **T1, T3, T5, T7b**.
 
 ## Tabel pengujian (format laporan bagian 10)
 
@@ -32,8 +33,9 @@ Minimal yang wajib (guideline): 3 skenario, termasuk abnormal. Jika waktu sempit
 | T4 — Tongkat terlalu miring | Ubah rotasi MPU6050 sehingga sudut > 65° dan tahan ≥ 2 s. Sambil miring, ubah jarak HC-SR04 seperti T3. | `CANE_TILT_ADVISORY` + 2 bunyi 750 Hz setelah 2 s. Deteksi tepi **tetap berjalan** memakai jarak mentah (C2). Dashboard: *Cane Tilt* > 65° (oranye), garis tilt melewati batas *Too far*. | [TBD — jalankan di Wokwi] | [TBD] |
 | T5 — Darurat, lalu ada tepi | Tahan tombol hijau **3 s**. Selama status darurat, ubah jarak HC-SR04 20 → 60 cm. | Setelah 3 s: `HELP_REQUEST`, state `EMERGENCY`, 4 bunyi 1600 Hz; status bantuan tetap aktif tanpa Wi-Fi. Peringatan tepi **tetap berbunyi** dan memotong pola darurat (C2). Dashboard: kartu *Emergency*, *Help Requests* = 1; status tetap darurat sampai `ACK HELP` di Serial (reset demo, bukan bukti bantuan datang). | [TBD — jalankan di Wokwi] | [TBD] |
 | T6 — Tombol darurat ditekan singkat | Tekan tombol hijau ± 1 s, lepas. | Tidak ada `HELP_REQUEST`; state tidak berubah (butuh tahan 3 s, debounce 40 ms). Dashboard tidak berubah. | [TBD — jalankan di Wokwi] | [TBD] |
-| T7 — Koneksi terputus | Saat dashboard menampilkan *Online*: hentikan simulasi Wokwi (atau putuskan Wi-Fi). Uji juga: broker tidak dapat dijangkau sementara sensor tetap diuji seperti T3. | Dashboard menjadi *Offline* (Last Will `online=0`), nilai terakhir tetap tampil dengan label. Alarm tepi di tongkat **tetap berbunyi** tanpa koneksi (P3). Setelah tersambung lagi, dashboard kembali *Online* dalam ± 1 heartbeat (2 s). Catat `loopMaxMs` dari Serial saat broker tidak terjangkau (bukti klaim non-blocking, C3). | [TBD — jalankan di Wokwi] | [TBD] |
-| T8 — Pesan asing atau rusak di broker publik | Dari HiveMQ WebSocket Client, publish ke `sic8/fahhh/device/status`: (a) teks `hello`, (b) `{"device_id":"other"}`. | Dashboard tidak error dan tidak menampilkan data palsu; penghitung *Ignored … message(s)* di bawah daftar event bertambah 2. | [TBD — jalankan di Wokwi] | [TBD] |
+| T7a — Tongkat terputus, lalu pulih | Saat dashboard menampilkan *Online*: tekan **Stop** di Wokwi dan catat waktunya. Tunggu dashboard berubah. Lalu tekan **Play** lagi. | Dalam ± 6 s tanpa status, dashboard tidak lagi *Online* (*No data* atau *Offline*). Broker mengirim Last Will `online=0` → dashboard *Offline*; nilai terakhir tetap tampil dengan label. Catat berapa detik sampai *Offline* (bisa segera bila koneksi ditutup, atau sampai ± 1,5 × keep-alive). Setelah Play: Wi-Fi bergabung dan MQTT tersambung ulang (TLS ± 6–7 s pada uji konektivitas, belum termasuk Wi-Fi); dashboard kembali *Online* dalam **satu heartbeat (2 s) setelah MQTT tersambung**. Catat waktu total dari Play sampai *Online*. | [TBD — jalankan di Wokwi] | [TBD] |
+| T7b — Broker tidak terjangkau, alarm tetap lokal | Di `firmware/secrets.h` (tidak di-commit), ganti sementara `MQTT_HOST` ke host yang tidak ada, misalnya `broker.invalid`. Jalankan Wokwi (Wi-Fi tetap tersambung) dan ulangi langkah T3 (20 → 60 cm). Kembalikan `MQTT_HOST` setelahnya. | Serial berulang kali menampilkan gagal tersambung ke broker, tetapi `EDGE_WARNING` dan bunyi panjang **tetap muncul tepat waktu** seperti T3 (P3). Dashboard tidak menerima data (wajar). Catat `loopMaxMs` dari Serial selama percobaan tersambung: ini bukti klaim non-blocking di firmware lengkap (C3). | [TBD — jalankan di Wokwi] | [TBD] |
+| T8 — Dashboard mengabaikan pesan rusak atau asing | Dari HiveMQ WebSocket Client, publish ke `sic8/fahhh/device/status`: (a) teks `hello`, (b) `{"device_id":"other"}`. | Dashboard tidak error dan tidak menampilkan data dari pesan tersebut; penghitung *Ignored … message(s)* di bawah daftar event bertambah 2. **Bukan uji keamanan:** broker publik tidak memakai login, jadi pesan valid dengan `device_id: unit-01` dari pihak lain tetap akan diterima. Batasan ini dicatat di laporan 8.2 dan 14. | [TBD — jalankan di Wokwi] | [TBD] |
 | T9 — Kartu RFID tidak terdaftar | Pada state `SEEK_PLATFORM`, tap kartu RFID dengan UID yang tidak ada di daftar. | Serial `RFID_UNREGISTERED uid=…`; state tidak berubah; tidak ada event `CHECKPOINT`. | [TBD — jalankan di Wokwi] | [TBD] |
 
 ## Cara menjalankan (untuk sesi integrasi Rabu)
@@ -49,5 +51,6 @@ Minimal yang wajib (guideline): 3 skenario, termasuk abnormal. Jika waktu sempit
 
 ## Catatan untuk laporan
 
-- T7 adalah bukti paling penting untuk P3 (edge computing): alarm tidak bergantung pada internet, MQTT hanya melapor.
+- T7b adalah bukti paling penting untuk P3 (edge computing): alarm tidak bergantung pada broker, MQTT hanya melapor. T7a menguji sisi dashboard: Last Will dan pemulihan.
+- T8 hanya menguji ketahanan dashboard terhadap pesan rusak atau asing. Keamanan (autentikasi) tidak ada di broker publik; itu pekerjaan lanjutan (klaster HiveMQ Cloud privat dengan login).
 - Batasan yang harus disebut (dari C2/C3): potensiometer = simulasi BLE, `SIM ARRIVE` = simulasi telemetri kereta, LED = pengganti motor getar, MQTT QoS 0 (event bisa hilang, status 2 s memulihkan tampilan), celah peron–kereta (P1) belum diukur.

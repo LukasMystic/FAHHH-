@@ -1,9 +1,0 @@
-received_at,topic,device_id,uptime_s,event,state,distance_cm,battery
-2026-10-26T11:28:07,device/online,,,,OFFLINE,,
-2026-10-26T11:29:36,device/online,,,,ONLINE,,
-2026-10-26T11:29:36,device/status,unit-01,0,,NORMAL,119.0,100
-2026-10-26T11:29:38,device/status,unit-01,2,,NORMAL,128.0,100
-2026-10-26T11:29:40,device/status,unit-01,4,,NORMAL,146.0,99
-2026-10-26T11:29:42,device/status,unit-01,6,,NORMAL,147.0,99
-2026-10-26T11:29:44,device/events,unit-01,8,BOARDING_GAP,WARNING,132.0,99
-2026-10-26T11:29:44,device/status,unit-01,8,,WARNING,132.0,99

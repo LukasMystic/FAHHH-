@@ -13,7 +13,7 @@ Only the owner edits this file. Changes after publishing: `CONTRACT CHANGE C3` +
 
 MQTT **only reports**, one way: ESP32 → broker → dashboard. Every safety alert is decided and fired on the ESP32 first (P3). If Wi-Fi or the broker is down, alerts still work; MQTT messages are simply skipped.
 
-All Wi-Fi and MQTT work runs in its own FreeRTOS task, separate from the sensor and alert loop, so connecting or a slow network does not hold up a reading or an alert. This still has to be measured in Wokwi before the report states it (see the notes under the reference code).
+All Wi-Fi and MQTT work runs in its own FreeRTOS task, separate from the sensor and alert loop; the loop only hands JSON to a queue without waiting. The aim is that connecting or a slow network does not hold up a reading or an alert, but this has **not been measured yet** and the report may only claim it after the Wokwi measurement (see the notes under the reference code).
 
 No dashboard → device commands in Stage 2 (e.g. *companion acknowledges emergency*). That goes to report section 14, Pengembangan Lanjutan.
 
@@ -61,7 +61,7 @@ The report (8.2) must describe it this way and must not promise guaranteed event
 
 ## Payloads (JSON)
 
-Keep each message **under 256 bytes** (PubSubClient's default buffer) — compact JSON, no spaces. Numbers that are not available (`NAN` in the sketch) are sent as `-1`.
+Keep each JSON payload **under 200 bytes** — compact JSON, no spaces. PubSubClient's buffer must hold the whole packet (header + topic + JSON); the firmware sets `setBufferSize(384)`, and the longest C3 payload is about 170 bytes. Numbers that are not available (`NAN` in the sketch) are sent as `-1`.
 
 ### `device/events`
 
@@ -158,46 +158,57 @@ The dashboard uses this list to show station names. If the sketch's list changes
 
 ## Reference: adding MQTT to the sketch (for William)
 
-Not part of the contract, just a starting point. Library: `PubSubClient` (add `PubSubClient` to `libraries.txt`). No JSON library needed.
+Not part of the contract, and **not a tested drop-in patch**: an illustration of the pattern (based on William's review of PR #6). Library: `PubSubClient` (add it to `libraries.txt`). No JSON library needed.
+
+**Rule:** `loop()` and `event()` never call `mqtt.connect()`, `mqtt.loop()` or `mqtt.publish()`. All Wi-Fi and MQTT work happens in one FreeRTOS task on core 0. The sensor and alert code in `loop()` (core 1) only formats JSON and hands it to a queue **without waiting**. While offline, messages are dropped, not queued (see "Delivery" above).
 
 ```cpp
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 #include <PubSubClient.h>
+#include <atomic>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/queue.h"
 #include "secrets.h"   // WIFI_SSID, WIFI_PASSWORD, MQTT_HOST, MQTT_PORT
 
-WiFiClientSecure net;
-PubSubClient mqtt(net);
 const char* T_EVENTS = "sic8/fahhh/device/events";
 const char* T_STATUS = "sic8/fahhh/device/status";
 const char* T_ONLINE = "sic8/fahhh/device/online";
-unsigned long lastMqttTry = 0, lastMqttStatus = 0;
 
-// NAN -> -1 for JSON
-float j(float v) { return isfinite(v) ? v : -1; }
+enum class TxKind : uint8_t { Event, Status };
+struct TxMessage { TxKind kind; char json[256]; };
+QueueHandle_t txQueue = nullptr;
+std::atomic<bool> mqttReady{false};
 
-void connectMqtt() {                       // call every loop; returns fast
-  if (mqtt.connected() || WiFi.status() != WL_CONNECTED) return;
-  if (millis() - lastMqttTry < 5000) return;  // retry at most every 5 s
-  lastMqttTry = millis();
-  if (mqtt.connect("fahhh-esp32-unit-01", nullptr, nullptr, T_ONLINE, 1, true, "0"))
-    mqtt.publish(T_ONLINE, "1", true);
+// Called only from loop()/event(), never from an ISR. Zero wait: local alerts continue.
+bool queueJson(TxKind kind, const char* json) {
+  if (!txQueue || !mqttReady.load()) return false;   // drop while offline
+  TxMessage m{};
+  m.kind = kind;
+  int n = snprintf(m.json, sizeof(m.json), "%s", json);
+  if (n < 0 || n >= (int)sizeof(m.json)) return false;
+  return xQueueSend(txQueue, &m, 0) == pdTRUE;       // queue full: drop, never wait
 }
 
-// Call this at the end of event(name, source)
+// --- C3 JSON builders, called from the main loop -------------------------
+
+float j(float v) { return isfinite(v) ? v : -1; }   // NAN -> -1 for JSON
+
+// Call at the end of event(name, source)
 void publishEvent(const char* name, const char* source) {
-  if (!mqtt.connected()) return;           // never block an alert on the network
   char buf[256];
   snprintf(buf, sizeof(buf),
     "{\"device_id\":\"unit-01\",\"uptime_s\":%lu,\"event\":\"%s\",\"state\":\"%s\",\"source\":\"%s\",\"distance_cm\":%.0f}",
     millis() / 1000, name, stateName(state), source, j(distanceCm));
-  mqtt.publish(T_EVENTS, buf);
+  queueJson(TxKind::Event, buf);
 }
 
-// Call every loop; sends every 2 s
+// Call every loop(); sends every 2 s
+unsigned long lastStatusQueued = 0;
 void publishStatus() {
-  if (!mqtt.connected() || millis() - lastMqttStatus < 2000) return;
-  lastMqttStatus = millis();
+  if (millis() - lastStatusQueued < 2000) return;
+  lastStatusQueued = millis();
   const char* station = currentNo >= 0 ? LINES[lineNo][currentNo].id : "";
   const char* dest = state >= SEEK_PLATFORM ? LINES[lineNo][destNo].id : "";
   char buf[256];
@@ -206,15 +217,65 @@ void publishStatus() {
     "\"edge\":%d,\"train_near\":%d,\"help\":%d,\"station\":\"%s\",\"dest\":\"%s\"}",
     millis() / 1000, stateName(state), j(distanceCm), j(tiltDeg),
     edge, trainNear, help, station, dest);
-  mqtt.publish(T_STATUS, buf);
+  queueJson(TxKind::Status, buf);
 }
 
-// setup(): WiFi.begin(WIFI_SSID, WIFI_PASSWORD, 6); net.setInsecure(); mqtt.setServer(MQTT_HOST, MQTT_PORT);
-// loop(): after all service*() calls: connectMqtt(); mqtt.loop(); publishStatus();
+// --- network task on core 0: the only code that touches Wi-Fi/MQTT -------
+
+void mqttTask(void*) {
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD, 6);   // Wokwi-GUEST, channel 6 connects faster
+  WiFiClientSecure net;                      // local to the task: loop() cannot use it
+  net.setInsecure();                         // Wokwi demo only (see notes)
+  PubSubClient mqtt(net);
+  mqtt.setServer(MQTT_HOST, MQTT_PORT);
+  mqtt.setBufferSize(384);                   // header + topic + JSON must fit (default 256)
+  mqtt.setSocketTimeout(5);                  // default 15 s
+  TxMessage m{};
+  unsigned long lastTry = millis() - 5000UL;
+
+  for (;;) {
+    if (WiFi.status() != WL_CONNECTED) {
+      mqttReady.store(false);
+      while (xQueueReceive(txQueue, &m, 0) == pdTRUE) {}   // no offline backlog
+      if (millis() - lastTry >= 5000UL) { lastTry = millis(); WiFi.reconnect(); }
+      vTaskDelay(pdMS_TO_TICKS(50));
+      continue;
+    }
+    if (!mqtt.connected()) {
+      mqttReady.store(false);
+      while (xQueueReceive(txQueue, &m, 0) == pdTRUE) {}
+      if (millis() - lastTry >= 5000UL) {
+        lastTry = millis();
+        if (mqtt.connect("fahhh-esp32-unit-01", nullptr, nullptr,
+                         T_ONLINE, 1, true, "0")) {   // Last Will: QoS 1, retained
+          mqtt.publish(T_ONLINE, "1", true);          // normal publish: QoS 0, retained
+          mqttReady.store(true);
+        }
+      }
+      vTaskDelay(pdMS_TO_TICKS(50));
+      continue;
+    }
+    mqtt.loop();
+    if (xQueueReceive(txQueue, &m, 0) == pdTRUE)
+      mqtt.publish(m.kind == TxKind::Event ? T_EVENTS : T_STATUS, m.json);
+    vTaskDelay(pdMS_TO_TICKS(10));
+  }
+}
+
+void startMqttTask() {
+  txQueue = xQueueCreate(8, sizeof(TxMessage));
+  if (txQueue) xTaskCreatePinnedToCore(mqttTask, "mqtt", 16384, nullptr, 1, nullptr, 0);
+}
+
+// setup(): at the end, startMqttTask();
+// event(): at the end, publishEvent(name, source);
+// loop(): after all service*() calls, publishStatus();
+// Never call mqtt.connect(), mqtt.loop() or mqtt.publish() from loop() or event().
 ```
 
 Notes:
-- Sensors and alerts run first in `loop()`; MQTT comes after, so a slow network never delays a warning (P3).
-- `mqtt.connect()` itself can block for 1–3 s during the TLS handshake. That is why it only retries every 5 s. Mention this limitation in report 8.2; a real device would run MQTT in a separate FreeRTOS task.
-- `dest` is only sent from `SEEK_PLATFORM` onward, because before that the user is still choosing (the state order in the `enum` makes `state >= SEEK_PLATFORM` work, except `EMERGENCY`, which is last and also sends the chosen destination).
+- **Not measured yet.** The pattern is meant to keep network delays out of `loop()`, but the report may only claim that after measuring it: record the longest `loop()` duration (e.g. `loopMaxMs`) in the 5 s Serial status, once with the broker connected and once while it is unreachable (test T7). Put the numbers in report 8.2.
+- If Wokwi does not run the second task properly, say so in the report instead of claiming non-blocking behaviour.
+- `dest` is only sent from `SEEK_PLATFORM` onward, because before that the user is still choosing (the `enum` order makes `state >= SEEK_PLATFORM` work; `EMERGENCY` is last and also sends the chosen destination).
 - `setInsecure()` is acceptable for the Wokwi demo; the report should mention that a real device would verify the broker's certificate and use a private broker with logins.

@@ -203,8 +203,8 @@ def main():
 
     def publish(topic, payload, qos):
         text = json.dumps(payload, separators=(",", ":"))
-        if len(text) >= 256:
-            print(f"[warn] payload is {len(text)} bytes; C3 limit is 256")
+        if len(text) >= 200:
+            print(f"[warn] payload is {len(text)} bytes; C3 limit is 200")
         print(f"-> {prefix}{topic} {text}")
         if client:
             client.publish(prefix + topic, text, qos=qos)

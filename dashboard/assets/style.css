@@ -1,0 +1,72 @@
+/* FAHHH? dashboard. Follows Apple's Human Interface Guidelines for a web page:
+   system font (SF on Apple devices), grouped inset lists, system colours, large title,
+   colour always paired with a word. */
+
+:root {
+  color-scheme: light;
+  --bg: #f2f2f7;            /* systemGroupedBackground */
+  --group: #ffffff;         /* secondarySystemGroupedBackground */
+  --label: #000000;
+  --label-2: rgba(60, 60, 67, 0.6);   /* secondaryLabel */
+  --separator: rgba(60, 60, 67, 0.29);
+  --blue: #007aff;
+  --green: #248a3d;         /* systemGreen, accessible text variant */
+  --orange: #c93400;        /* systemOrange, accessible text variant */
+  --red: #d70015;           /* systemRed, accessible text variant */
+  --gray: #6c6c70;          /* systemGray, accessible text variant */
+  --radius: 10px;
+}
+
+html, body { margin: 0; background: var(--bg); color: var(--label); }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Helvetica Neue", Arial, sans-serif;
+  font-size: 17px; line-height: 1.29; letter-spacing: -0.41px;
+  -webkit-font-smoothing: antialiased;
+}
+.page { max-width: 1000px; margin: 0 auto; padding: 16px 16px 48px; }
+@media (min-width: 740px) { .page { padding: 24px 32px 64px; } }
+.num { font-variant-numeric: tabular-nums; }
+
+/* Large title */
+.title { padding: 8px 0 4px; }
+.title h1 { font-size: 34px; line-height: 41px; font-weight: 700; letter-spacing: 0.37px; margin: 0; }
+.title p { margin: 4px 0 0; color: var(--label-2); font-size: 15px; letter-spacing: -0.24px; }
+.status { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: 8px; font-size: 15px; letter-spacing: -0.24px; }
+.status b { font-weight: 600; }
+
+/* Section header + grouped inset list */
+.section { margin-top: 32px; }
+.section-header { font-size: 13px; line-height: 18px; text-transform: uppercase; letter-spacing: -0.08px;
+                  color: var(--label-2); margin: 0 16px 8px; }
+.section-footer { font-size: 13px; line-height: 18px; color: var(--label-2); margin: 8px 16px 0; letter-spacing: -0.08px; }
+.group { background: var(--group); border-radius: var(--radius); overflow: hidden; }
+.row { display: flex; justify-content: space-between; align-items: center; gap: 16px;
+       min-height: 44px; padding: 11px 16px; box-sizing: border-box; position: relative; }
+.row + .row::before { content: ""; position: absolute; top: 0; left: 16px; right: 0; height: 0.5px; background: var(--separator); }
+.row .value { color: var(--label-2); text-align: right; }
+.row .sub { display: block; font-size: 15px; color: var(--label-2); letter-spacing: -0.24px; margin-top: 2px; }
+
+/* Current state: big word in its system colour, sentence below */
+.state { padding: 16px; }
+.state .word { font-size: 28px; line-height: 34px; font-weight: 700; letter-spacing: 0.36px; }
+.state .what { font-size: 17px; margin-top: 4px; }
+.state .when { font-size: 13px; color: var(--label-2); margin-top: 4px; letter-spacing: -0.08px; }
+
+.NORMAL { color: var(--green); }
+.GUIDING, .INFO { color: var(--blue); }
+.WARNING { color: var(--orange); }
+.EMERGENCY { color: var(--red); }
+.ERROR, .NODATA { color: var(--gray); }
+.ok { color: var(--green); }
+.bad { color: var(--red); }
+.unknown { color: var(--gray); }
+
+/* Layout */
+.grid { display: grid; grid-template-columns: 1fr; gap: 0 24px; }
+@media (min-width: 860px) { .grid { grid-template-columns: 1fr 1fr; } .grid.wide { grid-template-columns: 2fr 1fr; } }
+.chart { padding: 8px 4px 0; }
+
+/* Event list rows */
+.event .left { min-width: 0; }
+.event .time { color: var(--label-2); white-space: nowrap; }
+.empty { color: var(--label-2); }

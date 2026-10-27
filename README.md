@@ -21,7 +21,7 @@ Samsung Innovation Campus Batch 8 · Selection Phase 2 — *IoT: Device and Hard
 ```
 Sensors → ESP32 (logic) → Vibration / buzzer alerts
                 ↓
-      Serial + MQTT → HiveMQ Cloud → Python dashboard (companion)
+      Serial + MQTT → HiveMQ public broker → Python dashboard (companion)
 ```
 
 ## Team
@@ -122,13 +122,14 @@ AI agents **never merge and never push to `main`**. An agent may create a branch
 
 ## Quick start
 
-**Firmware:** open the Wokwi project link above, or copy `firmware/` into a new Wokwi ESP32 project. Copy `firmware/secrets.example.h` to `firmware/secrets.h` and add the HiveMQ credentials (ask Stanley privately).
+**Firmware:** open the Wokwi project link above, or copy `firmware/` into a new Wokwi ESP32 project. Copy `firmware/secrets.example.h` to `firmware/secrets.h` (defaults already point to the HiveMQ public broker — no login needed).
 
 **Dashboard:**
 ```bash
+python3 -m venv SIC && source SIC/bin/activate   # repo root, git-ignored
+pip install -r dashboard/requirements.txt
 cd dashboard
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env   # add HiveMQ credentials
-python fake_publisher.py   # optional: test data without the ESP32
+cp .env.example .env   # optional: defaults = HiveMQ public broker
+python dashboard.py        # open http://127.0.0.1:8050
+python fake_publisher.py   # second terminal: test data without the ESP32
 ```

@@ -33,7 +33,7 @@ Contract:
 
 ```
 Pain:     none
-Progress: Repo scaffold, AGENTS.md
-Plan:
-Contract: C3 draft in contracts/C3_mqtt.md
+Progress: Repo scaffold + rules; C3 draft v2; dashboard/fake_publisher.py (tested on a local broker)
+Plan:     Mon — HiveMQ Cloud cluster, share credentials privately, publish C3 by 18:00
+Contract: C3 draft v2 — William please read; event names wait for C2
 ```

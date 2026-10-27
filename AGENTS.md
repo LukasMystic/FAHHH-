@@ -77,21 +77,22 @@ A contract is a short file that fixes where two roles meet. Build against the co
 
 ### Starting drafts (owners replace these)
 
-**C3 · MQTT (draft, Stanley)**
+**C3 · MQTT (draft, Stanley)** — summary only; the full contract is `contracts/C3_mqtt.md`. One way only (device → dashboard).
 
-Broker: HiveMQ Cloud. Prefix: `sic8/fahhh/`.
+Broker: HiveMQ public broker `broker.hivemq.com:8883` (TLS, no login; team decision Mon 26, explained in report 8.2). Prefix: `sic8/fahhh/`.
 
 | Direction | Topic | When |
 |---|---|---|
 | ESP32 → broker | `sic8/fahhh/device/events` | On every state change |
-| ESP32 → broker | `sic8/fahhh/device/status` | Every 5 s (heartbeat) |
+| ESP32 → broker | `sic8/fahhh/device/status` | Every 2 s (heartbeat) |
+| ESP32 → broker | `sic8/fahhh/device/online` | `"1"` on connect, `"0"` as Last Will (retained) |
 
 ```json
-{ "device_id": "unit-01", "ts": 1761380000, "event": "LEVEL_CHANGE",
-  "state": "WARNING", "distance_cm": 42, "battery": 87 }
+{ "device_id": "unit-01", "uptime_s": 132, "event": "EDGE_WARNING",
+  "state": "WAIT_TRAIN", "source": "HC_SR04", "distance_cm": 42 }
 ```
 
-Candidate `event` values (William confirms in C2): `LEVEL_CHANGE` (S1), `BOARDING_GAP` (P1), `GUIDE_STEP` / `ARRIVED_PLATFORM` (P2), `EMERGENCY` (S2), `LOW_BATTERY`.
+States and event names are taken from the firmware (C3 v3): e.g. `EDGE_WARNING` (S1), `SIM_TRAIN_NEAR` / `BOARDING_CONFIRMED_BY_USER` (P1), `CHECKPOINT` (P2), `HELP_REQUEST` (S2). Full list in `contracts/C3_mqtt.md`.
 
 **C1 · Pin map** — draft lives in the team plan (`SIC8_Stage2_Team_Plan.docx`, section 2). Gebi confirms which parts actually exist in Wokwi.
 
@@ -129,7 +130,7 @@ When you work in this project:
 4. **No invented results.** Test results, Serial output and screenshots come only from real Wokwi runs. If a result is not available, write `[TBD — run in Wokwi]`.
 5. **No invented facts.** Background and problem claims need a source in `research/`. If unsure, mark `[needs source]`.
 6. **Wokwi first.** Only propose components that exist in Wokwi. If a real part is missing, propose a stand-in and say so explicitly (the report must explain it).
-7. **Secrets stay out.** HiveMQ username/password go in `firmware/secrets.h` and `dashboard/.env`, both git-ignored. Only commit `secrets.example.h` / `.env.example`.
+7. **Secrets stay out.** Any Wi-Fi or broker credentials go in `firmware/secrets.h` and `dashboard/.env`, both git-ignored. The public broker has no login, but keep the pattern. Only commit `secrets.example.h` / `.env.example`.
 8. **Report language is Bahasa Indonesia**, following `report/Template-Laporan-Stage-2.docx` section order. Code comments and identifiers in English.
 9. **Keep it simple.** Prefer the smallest change that meets the decided features. Anything extra goes to "Pengembangan Lanjutan" (section 14), not into the build.
 10. **Git:** follow §11. **Never merge, never push to `main`.** With your human's permission you may create a branch, commit (§11 format) and open a PR that names the member you work for. Merging is always done by a human after the reviewer approves.
@@ -193,7 +194,7 @@ From the official Stage 2 guideline:
 - [ ] Test screenshots
 - [ ] ESP32 as main controller, ≥1 input, ≥1 output, Serial Monitor used
 - [ ] ≥3 test scenarios incl. abnormal case, with input / expected / actual / status
-- [ ] MQTT via HiveMQ + Python (paho-mqtt) dashboard with Plotly/Matplotlib
+- [ ] MQTT via HiveMQ (public broker, reason in 8.2) + Python (paho-mqtt) dashboard with Plotly/Matplotlib
 - [ ] Every component has a technical reason; every stand-in part is explained
 - [ ] Section 12 lists real contributions of all four members
 

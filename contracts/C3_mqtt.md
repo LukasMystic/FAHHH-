@@ -5,7 +5,7 @@
 | **Owner** | Stanley |
 | **Used by** | William (firmware publishes), Stanley (dashboard subscribes) |
 | **Due** | Mon 26 Oct, 18:00 |
-| **Status** | DRAFT v3 — names taken from William's sketch (commit `08a37ec`); waiting for William to confirm in C2 and for all four 👍 |
+| **Status** | DRAFT v3 — names taken from William's sketch (`08a37ec`) and C2 (PR #5); waiting for all four 👍 |
 
 Only the owner edits this file. Changes after publishing: `CONTRACT CHANGE C3` + 👍 from all four.
 
@@ -106,6 +106,8 @@ One message per `event(name, source)` call in the sketch.
 | `EDGE_WARNING` | S1, P1 | Distance to the ground jumps by > 15 cm for 3 readings (edge or step ahead) |
 | `EDGE_CLEAR` | S1 | Distance back to normal for 0.7 s |
 | `CANE_TILT_ADVISORY` | S1 | Cane tilted more than 65° for 2 s |
+| `EDGE_SENSOR_FAULT` | S1 | Ultrasonic sensor gives no echo (long beep, like a hazard). An active edge warning is not cleared by a fault |
+| `MPU_FAULT_RAW_FALLBACK` | S1 | MPU6050 not readable; edge detection keeps running on the raw distance |
 | `HELP_REQUEST` | S2 | Help button held for 3 s |
 | `CHECKPOINT` | P2 | An RFID station tag was read |
 | `SIM_TRAIN_NEAR` | P1 | Door beacon near while waiting (potentiometer stand-in or Serial `SIM TRAIN`) |
@@ -114,7 +116,7 @@ One message per `event(name, source)` call in the sketch.
 | `ALIGHTING_CONFIRMED_BY_USER` | P1 | User pressed the knob while arriving |
 | *any state name* | — | `changeState()` also calls `event(<new state>)`, so every state change arrives as an event with the state's name |
 
-Sensor problems (ultrasonic no echo, MPU not readable) are **not** events; they show up in `device/status` as `distance_cm: -1` / `tilt_deg: -1`.
+Sensor faults are sent as events when they happen (`EDGE_SENSOR_FAULT`, `MPU_FAULT_RAW_FALLBACK`, from C2) and also show up in `device/status` as `distance_cm: -1` / `tilt_deg: -1` while they last.
 
 ## Demo stations (from the sketch)
 
@@ -137,7 +139,7 @@ The dashboard uses this list to show station names. If the sketch's list changes
 | Direction | One way (device → dashboard) | Smaller scope for 5 days; downlink is future work |
 | Heartbeat | Every 2 s | Live chart looks responsive in the demo video |
 | Time | `uptime_s` from the ESP32, dashboard stamps arrival time | No NTP code, one less failure point in Wokwi |
-| Names | States and events exactly as in William's sketch (v3, Tue 27) | The firmware is the source of truth; no renaming layer to keep in sync |
+| Names | States and events exactly as in William's sketch and C2 (v3, Tue 27). The "proposed mapping" to old names in C2 is not used | The firmware is the source of truth; no renaming layer to keep in sync |
 | Battery | Dropped (v3) | Not measured or simulated anywhere in the circuit |
 
 ## Reference: adding MQTT to the sketch (for William)

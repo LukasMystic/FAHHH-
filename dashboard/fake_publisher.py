@@ -46,6 +46,7 @@ JOURNEY = [
 EDGE_CHANCE = 0.06       # per heartbeat, outside the train
 TILT_CHANCE = 0.03
 NO_ECHO_CHANCE = 0.03
+MPU_FAULT_CHANCE = 0.015
 HELP_CHANCE = 0.004      # rare
 
 
@@ -89,6 +90,7 @@ class FakeCane:
         self.edge = False
         self.edge_beats = 0
         self.no_echo_beats = 0
+        self.mpu_fault_beats = 0
         self.help = False
         self.help_beats = 0
         self.state = "SELECT_LINE"
@@ -117,7 +119,7 @@ class FakeCane:
     def status(self):
         self.publish(T_STATUS, {
             "device_id": DEVICE_ID, "uptime_s": self.uptime(), "state": self.state,
-            "distance_cm": self.dist_value(), "tilt_deg": round(self.tilt),
+            "distance_cm": self.dist_value(), "tilt_deg": -1 if self.mpu_fault_beats > 0 else round(self.tilt),
             "edge": int(self.edge), "train_near": int(self.train_near), "help": int(self.help),
             "station": self.station, "dest": self.dest,
         }, qos=0)
@@ -132,6 +134,13 @@ class FakeCane:
             self.no_echo_beats -= 1
         elif random.random() < NO_ECHO_CHANCE:
             self.no_echo_beats = random.randint(1, 2)
+            self.event("EDGE_SENSOR_FAULT", "HC_SR04")
+
+        if self.mpu_fault_beats > 0:
+            self.mpu_fault_beats -= 1
+        elif random.random() < MPU_FAULT_CHANCE:
+            self.mpu_fault_beats = random.randint(1, 3)
+            self.event("MPU_FAULT_RAW_FALLBACK", "MPU6050")
 
         if self.edge:
             self.edge_beats -= 1

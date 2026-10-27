@@ -62,6 +62,8 @@ EVENTS = {
     "EDGE_WARNING": ("Edge Ahead", "WARNING"),
     "EDGE_CLEAR": ("Edge Cleared", "NORMAL"),
     "CANE_TILT_ADVISORY": ("Cane Tilted Too Far", "WARNING"),
+    "EDGE_SENSOR_FAULT": ("Distance Sensor Fault", "WARNING"),
+    "MPU_FAULT_RAW_FALLBACK": ("Tilt Sensor Fault", "WARNING"),
     "HELP_REQUEST": ("Help Requested", "EMERGENCY"),
     "CHECKPOINT": ("Station Tag Read", "INFO"),
     "SIM_TRAIN_NEAR": ("Train at the Door", "INFO"),
@@ -294,6 +296,8 @@ def build_app(store):
             else:
                 title, sev, sev_word = e["event"].replace("_", " ").title(), "INFO", "Info"
             detail = []
+            if e["event"] == "MPU_FAULT_RAW_FALLBACK":
+                detail.append("edge check uses raw distance")
             if e["distance_cm"] is not None and e["event"] in ("EDGE_WARNING", "EDGE_CLEAR", "HELP_REQUEST"):
                 detail.append(f"{e['distance_cm']:.0f} cm")
             if e["source"]:

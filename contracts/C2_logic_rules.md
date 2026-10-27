@@ -41,7 +41,7 @@ Main transitions: `SELECT_LINE` → `SELECT_DEST` → `SEEK_PLATFORM` → `WAIT_
 | Two beeps, 750 Hz, 220 ms | Cane angle >65° for 2 seconds; `CANE_TILT_ADVISORY` |
 | Four beeps, 1600 Hz, 250 ms | Local help request active; `HELP_REQUEST` |
 
-Priority: an edge hazard or sensor fault can interrupt the help pattern, which resumes afterward. If both are pending, the fault pattern plays first, then the edge pattern, then help resumes. Ordinary navigation cues do not override hazard, fault, or help cues. The Wokwi LED stands in for vibration output; the demo has no vibration motor or spoken station names.
+Priority: an edge hazard or sensor fault can interrupt the help pattern, which resumes afterward. If both are pending, the edge pattern plays first, then the fault pattern, then help resumes. An edge warning can interrupt a fault pattern; a fault pattern waits for an active edge warning to finish. Ordinary navigation cues do not override hazard, fault, or help cues. The Wokwi LED stands in for vibration output; the demo has no vibration motor or spoken station names.
 
 **P3 rule:** S1 safety alerts are decided on the ESP32 and never wait for Wi-Fi/MQTT. The same rule must apply to P1 once gap measurement is implemented. The S2 help button also produces a local cue without a connection. MQTT publishing under C3 v3 remains pending firmware integration and Wokwi testing; local safety alerts never wait for it.
 

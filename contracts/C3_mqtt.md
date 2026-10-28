@@ -5,7 +5,7 @@
 | **Owner** | Stanley |
 | **Used by** | William (firmware publishes), Stanley (dashboard subscribes) |
 | **Due** | Mon 26 Oct, 18:00 |
-| **Status** | DRAFT v3 — names taken from William's sketch (`08a37ec`) and C2 (PR #5); waiting for all four 👍 |
+| **Status** | **PUBLISHED v3** — all four 👍, merged Tue 27 Oct (PR #6). Names from William's sketch and C2. Changes need `CONTRACT CHANGE C3` + 👍 from all four |
 
 Only the owner edits this file. Changes after publishing: `CONTRACT CHANGE C3` + 👍 from all four.
 
@@ -13,7 +13,7 @@ Only the owner edits this file. Changes after publishing: `CONTRACT CHANGE C3` +
 
 MQTT **only reports**, one way: ESP32 → broker → dashboard. Every safety alert is decided and fired on the ESP32 first (P3). If Wi-Fi or the broker is down, alerts still work; MQTT messages are simply skipped.
 
-All Wi-Fi and MQTT work runs in its own FreeRTOS task, separate from the sensor and alert loop; the loop only hands JSON to a queue without waiting. The aim is that connecting or a slow network does not hold up a reading or an alert, but this has **not been measured yet** and the report may only claim it after the Wokwi measurement (see the notes under the reference code).
+All Wi-Fi and MQTT work runs in its own FreeRTOS task, separate from the sensor and alert loop; the loop only hands JSON to a queue without waiting. The aim is that connecting or a slow network does not hold up a reading or an alert. **Measured in the connectivity test sketch** (Tue 27 Oct, `tests/results/2026-10-27_wokwi-connectivity.md`): `loopMaxMs` stayed 1–3 ms during 6–7 s TLS connects. Still to be confirmed inside the full firmware (test T7b) before the report claims it for the cane.
 
 No dashboard → device commands in Stage 2 (e.g. *companion acknowledges emergency*). That goes to report section 14, Pengembangan Lanjutan.
 
@@ -118,7 +118,7 @@ One message per `event(name, source)` call in the sketch.
 | `EDGE_WARNING` | S1, P1 | Distance to the ground jumps by > 15 cm for 3 readings (edge or step ahead) |
 | `EDGE_CLEAR` | S1 | Distance back to normal for 0.7 s |
 | `CANE_TILT_ADVISORY` | S1 | Cane tilted more than 65° for 2 s |
-| `EDGE_SENSOR_FAULT` | S1 | Ultrasonic sensor gives no echo (long beep, like a hazard). An active edge warning is not cleared by a fault |
+| `EDGE_SENSOR_FAULT` | S1 | Ultrasonic sensor gives no echo (sound pattern: see C2). An active edge warning is not cleared by a fault |
 | `MPU_FAULT_RAW_FALLBACK` | S1 | MPU6050 not readable; edge detection keeps running on the raw distance |
 | `HELP_REQUEST` | S2 | Help button held for 3 s |
 | `CHECKPOINT` | P2 | An RFID station tag was read |
@@ -154,7 +154,8 @@ The dashboard uses this list to show station names. If the sketch's list changes
 | Names | States and events exactly as in William's sketch and C2 (v3, Tue 27). The "proposed mapping" to old names in C2 is not used | The firmware is the source of truth; no renaming layer to keep in sync |
 | Battery | Dropped (v3) | Not measured or simulated anywhere in the circuit |
 | QoS | 0 for all publishes, Last Will at QoS 1 (v3, PR #6 review) | PubSubClient can only publish at QoS 0; the status heartbeat repeats the current state |
-| Network task | Wi-Fi/MQTT in a separate FreeRTOS task on core 0 (v3, PR #6 review) | A blocking connect must not delay sensor readings or alerts; to be measured in Wokwi |
+| Network task | Wi-Fi/MQTT in a separate FreeRTOS task on core 0 (v3, PR #6 review) | A blocking connect must not delay sensor readings or alerts; measured in the test sketch, firmware still to confirm (T7b) |
+| Keep-alive | `mqtt.setKeepAlive(30)`, **proposed** after the connectivity test (Tue 27); **not tested yet** | During that test Wokwi slowed down in a background tab and, with the 15 s default, the broker dropped the cane once. To be verified in the firmware run (T7a/T7b) |
 
 ## Reference: adding MQTT to the sketch (for William)
 
@@ -231,14 +232,17 @@ void mqttTask(void*) {
   mqtt.setServer(MQTT_HOST, MQTT_PORT);
   mqtt.setBufferSize(384);                   // header + topic + JSON must fit (default 256)
   mqtt.setSocketTimeout(5);                  // default 15 s
+  mqtt.setKeepAlive(30);                     // default 15 s; proposed for Wokwi slowdowns, not tested yet
   TxMessage m{};
   unsigned long lastTry = millis() - 5000UL;
+  unsigned long wifiSince = millis();         // start of the current Wi-Fi join attempt
 
   for (;;) {
     if (WiFi.status() != WL_CONNECTED) {
       mqttReady.store(false);
       while (xQueueReceive(txQueue, &m, 0) == pdTRUE) {}   // no offline backlog
-      if (millis() - lastTry >= 5000UL) { lastTry = millis(); WiFi.reconnect(); }
+      // Give each Wi-Fi join 15 s. Restarting sooner (the old 5 s here) means Wokwi never finishes joining.
+      if (millis() - wifiSince >= 15000UL) { wifiSince = millis(); WiFi.reconnect(); }
       vTaskDelay(pdMS_TO_TICKS(50));
       continue;
     }
@@ -275,7 +279,8 @@ void startMqttTask() {
 ```
 
 Notes:
-- **Not measured yet.** The pattern is meant to keep network delays out of `loop()`, but the report may only claim that after measuring it: record the longest `loop()` duration (e.g. `loopMaxMs`) in the 5 s Serial status, once with the broker connected and once while it is unreachable (test T7). Put the numbers in report 8.2.
+- **Measured in the test sketch, not yet in the firmware.** `tests/connectivity/sketch.ino` runs this pattern (with the Wi-Fi fix, but without `setKeepAlive(30)`, which was added after that run): TLS connect took 6.0–7.3 s and `loopMaxMs` stayed 1–3 ms (`tests/results/2026-10-27_wokwi-connectivity.md`). The firmware does more work in `loop()`, so repeat the measurement there (test T7b): print the longest `loop()` duration (`loopMaxMs`) in the 5 s Serial status, with the broker connected and while it is unreachable, and put those numbers in report 8.2.
+- Keep the Wokwi tab visible while testing: a background tab slows the simulation and can trigger a disconnect.
 - If Wokwi does not run the second task properly, say so in the report instead of claiming non-blocking behaviour.
 - `dest` is only sent from `SEEK_PLATFORM` onward, because before that the user is still choosing (the `enum` order makes `state >= SEEK_PLATFORM` work; `EMERGENCY` is last and also sends the chosen destination).
 - `setInsecure()` is acceptable for the Wokwi demo; the report should mention that a real device would verify the broker's certificate and use a private broker with logins.

@@ -5,15 +5,28 @@
 | **Owner** | Stanley |
 | **Used by** | William (firmware publishes), Stanley (dashboard subscribes) |
 | **Due** | Mon 26 Oct, 18:00 |
-| **Status** | **PUBLISHED v3** — all four 👍, merged Tue 27 Oct (PR #6). Names from William's sketch and C2. Changes need `CONTRACT CHANGE C3` + 👍 from all four |
+| **Status** | **DRAFT v4** (`CONTRACT CHANGE C3`, Thu 29 Oct): brings C3 in line with the firmware merged in PR #12. Needs 👍 from all four. v3 was published Tue 27 Oct (PR #6) |
 
 Only the owner edits this file. Changes after publishing: `CONTRACT CHANGE C3` + 👍 from all four.
+
+## What changed in v4
+
+The firmware (`firmware/sketch.ino`, PR #12) is the source of truth; v4 only describes what it already sends. Topics, broker, QoS and payload fields are **unchanged**.
+
+| | v3 | v4 |
+|---|---|---|
+| Stations | A01–A06, B01–B04 (two demo lines) | `DEMO_A` (origin), `DEMO_B` / `DEMO_C` (destinations), fictional |
+| States | Starts at `SELECT_LINE` | `SELECT_LINE` removed; starts at `SELECT_DEST` |
+| Boarding / alighting | `BOARDING_CONFIRMED_BY_USER`, `ALIGHTING_CONFIRMED_BY_USER` (knob press) | Removed. Boarding is `BOARDING_CONFIRMED_BY_TAG` (door tag read inside the train after the train checks pass); stepping off is the destination platform tag (`CHECKPOINT`) |
+| New events | | `CHECKPOINT_REJECTED`, `TRAIN_MATCH`, `TRAIN_REJECTED`, `TRAIN_STOPPED`, `TRAIN_MOVING`, `TRAIN_DOOR_OPEN`, `TRAIN_DOOR_CLOSED`, `BOARDING_READY`, `BOARDING_CANCELLED`, `BOARDING_CONFIRMED_BY_TAG`, `EDGE_SENSOR_RECOVERED`, `MPU_RECOVERED` |
+| `station` field | Last RFID station ID | Last confirmed **station** (`DEMO_A`, then the destination); checkpoint names stay in Serial |
+| Reference code | Illustration for William | Removed: the firmware now implements it (see "Implementation") |
 
 ## Principle
 
 MQTT **only reports**, one way: ESP32 → broker → dashboard. Every safety alert is decided and fired on the ESP32 first (P3). If Wi-Fi or the broker is down, alerts still work; MQTT messages are simply skipped.
 
-All Wi-Fi and MQTT work runs in its own FreeRTOS task, separate from the sensor and alert loop; the loop only hands JSON to a queue without waiting. The aim is that connecting or a slow network does not hold up a reading or an alert. **Measured in the connectivity test sketch** (Tue 27 Oct, `tests/results/2026-10-27_wokwi-connectivity.md`): `loopMaxMs` stayed 1–3 ms during 6–7 s TLS connects. Still to be confirmed inside the full firmware (test T7b) before the report claims it for the cane.
+All Wi-Fi and MQTT work runs in its own FreeRTOS task, separate from the sensor and alert loop; the loop only hands JSON to a queue without waiting. The aim is that connecting or a slow network does not hold up a reading or an alert. **Measured in the connectivity test sketch** (Tue 27 Oct, `tests/results/2026-10-27_wokwi-connectivity.md`): `loopMaxMs` stayed 1–3 ms during 6–7 s TLS connects. The firmware prints the same `loopMaxMs` in its 5 s Serial status; the report only claims it for the cane after test T7b.
 
 No dashboard → device commands in Stage 2 (e.g. *companion acknowledges emergency*). That goes to report section 14, Pengembangan Lanjutan.
 
@@ -61,20 +74,20 @@ The report (8.2) must describe it this way and must not promise guaranteed event
 
 ## Payloads (JSON)
 
-Keep each JSON payload **under 200 bytes** — compact JSON, no spaces. PubSubClient's buffer must hold the whole packet (header + topic + JSON); the firmware sets `setBufferSize(384)`, and the longest C3 payload is about 170 bytes. Numbers that are not available (`NAN` in the sketch) are sent as `-1`.
+Keep each JSON payload **under 200 bytes**: compact JSON, no spaces. PubSubClient's buffer must hold the whole packet (header + topic + JSON); the firmware sets `setBufferSize(384)`. With v4 names the longest event is about 155 bytes and the longest status about 165 bytes. Numbers that are not available (`NAN` in the sketch) are sent as `-1`.
 
 ### `device/events`
 
 One message per `event(name, source)` call in the sketch.
 
 ```json
-{"device_id":"unit-01","uptime_s":132,"event":"EDGE_WARNING","state":"WAIT_TRAIN","source":"HC_SR04","distance_cm":42}
+{"device_id":"unit-01","uptime_s":132,"event":"CHECKPOINT_REJECTED","state":"SEEK_PLATFORM","source":"RFID_PHYSICAL","distance_cm":21}
 ```
 
 ### `device/status`
 
 ```json
-{"device_id":"unit-01","uptime_s":135,"state":"WAIT_TRAIN","distance_cm":118,"tilt_deg":12,"edge":0,"train_near":0,"help":0,"station":"A01","dest":"A06"}
+{"device_id":"unit-01","uptime_s":135,"state":"WAIT_TRAIN","distance_cm":21,"tilt_deg":12,"edge":0,"train_near":1,"help":0,"station":"DEMO_A","dest":"DEMO_B"}
 ```
 
 | Field | Type | In | Sketch variable | Notes |
@@ -83,67 +96,106 @@ One message per `event(name, source)` call in the sketch.
 | `uptime_s` | int | both | `millis()/1000` | No NTP needed; the dashboard stamps the receive time itself |
 | `event` | string | events | `name` in `event()` | One of the event names below |
 | `state` | string | both | `stateName(state)` | One of the states below |
-| `source` | string | events | `source` in `event()` | What caused it, e.g. `HC_SR04`, `encoder_button`, `RFID_PHYSICAL` |
-| `distance_cm` | number | both | `distanceCm` | Tilt-corrected distance to the ground; `-1` = no valid reading |
+| `source` | string | events | `source` in `event()` | What caused it; see "Sources" below |
+| `distance_cm` | number | both | `distanceCm` | Distance to the ground, tilt-corrected; raw while the MPU6050 fails or the cane is tilted past 65°; `-1` = no valid reading |
 | `tilt_deg` | number | status | `tiltDeg` | Cane tilt from vertical; `-1` = MPU6050 not readable |
 | `edge` | 0/1 | status | `edge` | 1 while an edge warning is active |
-| `train_near` | 0/1 | status | `trainNear` | 1 while the door beacon (potentiometer stand-in) is near |
+| `train_near` | 0/1 | status | `trainNear` | 1 while waiting and the door beacon (potentiometer stand-in) is near; back to 0 after boarding |
 | `help` | 0/1 | status | `help` | 1 while a help request is active |
-| `station` | string | status | `LINES[lineNo][currentNo].id` | Last RFID checkpoint, `""` if none yet |
-| `dest` | string | status | `LINES[lineNo][destNo].id` | Chosen destination, `""` before it is chosen |
+| `station` | string | status | `lastStation` | `""` until the first origin checkpoint; then `DEMO_A` (also while on the train); the destination ID once its platform tag is confirmed |
+| `dest` | string | status | `destStationId()` | `DEMO_B` or `DEMO_C` after the knob press confirms it; `""` before |
 
-**Battery is not in C3 v3.** Nothing in the circuit measures or simulates it, so the team agreed to drop it rather than send a made-up value. (Needs the 👍 with this version.)
+**Battery is not in C3** (dropped in v3). Nothing in the circuit measures or simulates it, so no made-up value is sent.
 
 **Rules for both sides**
 - The dashboard ignores fields it does not know and treats missing fields as empty, so adding a field never breaks anything.
 - Names: topics lowercase; JSON keys `snake_case`; `event` and `state` values `UPPER_SNAKE_CASE`, exactly as printed on Serial.
 
-## States (from the sketch)
+## States (from the firmware)
 
 | State | Meaning |
 |---|---|
-| `SELECT_LINE` | User is choosing a line with the rotary knob |
-| `SELECT_DEST` | User is choosing the destination station |
-| `SEEK_PLATFORM` | Route set; waiting for an RFID checkpoint on the way to the platform |
-| `WAIT_TRAIN` | At the platform, waiting for the train |
-| `ON_TRAIN` | User confirmed boarding |
-| `ARRIVING` | Destination is near (simulated train telemetry or destination tag) |
-| `COMPLETE` | User confirmed alighting, or tapped the destination checkpoint |
-| `EMERGENCY` | Help button held for 3 s |
+| `SELECT_DEST` | Start, or after a reset: the user chooses the destination (`DEMO_B` / `DEMO_C`) with the knob |
+| `SEEK_PLATFORM` | Route confirmed with a knob press; walking to the origin platform, checkpoint tag by checkpoint tag |
+| `WAIT_TRAIN` | The origin platform tag was read in the right order; waiting for the train |
+| `ON_TRAIN` | The door tag inside the train (`TRAIN_INSIDE`) was read after all boarding checks passed |
+| `ARRIVING` | Serial `SIM ARRIVE` for the chosen destination; covers the train stopping, the doors opening, the destination platform tag and the walk to the exit |
+| `COMPLETE` | The last exit checkpoint was read |
+| `EMERGENCY` | Help button held for 3 s. Latched until the demo-only Serial `ACK HELP`, which restarts the journey at `SELECT_DEST` |
 
-## Event names (from the sketch)
+Every state change also arrives as an event named after the new state (`changeState()` calls `event()`).
 
-| Event | Feature | When |
+The firmware also has journey phases (`TO_ORIGIN_PLATFORM`, `AT_ORIGIN_PLATFORM`, …) and checkpoint names (`A_MASUK`, `A_P1_WAIT`, `TRAIN_INSIDE`, …). Those appear only in Serial, not in MQTT.
+
+## Event names (from the firmware)
+
+**Safety (S1, S2)**
+
+| Event | Feature | When | Source |
+|---|---|---|---|
+| `EDGE_WARNING` | S1, P1 | Distance to the ground jumps by > 15 cm (and > 25 cm) for 3 readings: edge or step ahead | `HC_SR04_MPU6050` (tilt-corrected) or `HC_SR04_RAW_FALLBACK` |
+| `EDGE_CLEAR` | S1 | Distance back to normal for 0.7 s | `HC_SR04` |
+| `EDGE_SENSOR_FAULT` | S1 | Ultrasonic sensor gives no echo. An active edge warning is not cleared by a fault | `HC_SR04` |
+| `EDGE_SENSOR_RECOVERED` | S1 | Echo is back after a fault | `HC_SR04` |
+| `MPU_FAULT_RAW_FALLBACK` | S1 | MPU6050 not readable; edge detection keeps running on the raw distance | `MPU6050` |
+| `MPU_RECOVERED` | S1 | MPU6050 readable again | `MPU6050` |
+| `CANE_TILT_ADVISORY` | S1 | Cane tilted more than 65° for 2 s | `MPU6050` |
+| `HELP_REQUEST` | S2 | Help button held for 3 s | `physical_help_button_long_press` |
+
+**Route to the platform and out of the destination (P2)**
+
+| Event | Feature | When | Source |
+|---|---|---|---|
+| `CHECKPOINT` | P2 | A checkpoint tag was read in the expected order (origin route, destination platform, exit route) | `RFID_PHYSICAL` or `SERIAL_SIMULATION` |
+| `CHECKPOINT_REJECTED` | P2, P1 | A tag that does not fit the route: wrong platform, wrong order, the door tag before boarding is ready, the destination platform tag before the train has stopped with its doors open, or a card that is not registered. Re-reading the last accepted tag is ignored (Serial only) | `RFID_PHYSICAL`, `SERIAL_SIMULATION` or `RFID_UNREGISTERED` |
+
+**Train and boarding (P1), simulated through Serial and the potentiometer**
+
+| Event | Feature | When | Source |
+|---|---|---|---|
+| `SIM_TRAIN_NEAR` | P1 | Door beacon near while waiting (potentiometer above about 2600 ADC) | `POTENTIOMETER_BLE_STANDIN` |
+| `TRAIN_MATCH` | P1 | `SIM TRAIN TRAIN01 <side> <dest>` matches the platform side and destination | `SERIAL_TRAIN_SIMULATION` |
+| `TRAIN_REJECTED` | P1 | `SIM TRAIN …` does not match (wrong train, side or destination) | `SERIAL_TRAIN_SIMULATION` |
+| `TRAIN_STOPPED` / `TRAIN_MOVING` | P1 | `SIM STOPPED` / `SIM MOVING` | `SERIAL_TRAIN_SIMULATION` |
+| `TRAIN_DOOR_OPEN` / `TRAIN_DOOR_CLOSED` | P1 | `SIM DOOR OPEN\|CLOSE <side>` on the right side | `SERIAL_TRAIN_SIMULATION` |
+| `BOARDING_READY` | P1 | All boarding checks pass: beacon near, train matched, stopped, door open on the right side, no edge, no ultrasonic fault | whatever completed the checks: `SERIAL_TRAIN_SIMULATION`, `POTENTIOMETER_BLE_STANDIN`, `HC_SR04_EDGE_CLEAR` or `HC_SR04_RECOVERED` |
+| `BOARDING_CANCELLED` | P1 | A check stops passing after `BOARDING_READY` (door closes, train moves, beacon far, edge, ultrasonic fault) | `SERIAL_TRAIN_SIMULATION`, `POTENTIOMETER_BLE_STANDIN`, `HC_SR04_EDGE` or `HC_SR04_FAULT` |
+| `BOARDING_CONFIRMED_BY_TAG` | P1 | Door tag inside the train read while boarding is ready; state becomes `ON_TRAIN` | `RFID_PHYSICAL` or `SERIAL_SIMULATION` |
+| `SIM_DESTINATION_APPROACH` | P1, P2 | `SIM ARRIVE <dest>` while on the train; state becomes `ARRIVING` | `SERIAL_TRAIN_SIMULATION` |
+
+**State names**: every state change, see above. Sources: `encoder_button` (route confirmed), `encoder_long_press_reset` (knob held > 1.2 s), `SERIAL_DEMO_RESET` (`ACK HELP`), `physical_help_button_long_press`, or the tag or simulation that caused it.
+
+**Sources that mean "simulated"**: `SERIAL_SIMULATION` (a tag typed as `SIM TAG`), `SERIAL_TRAIN_SIMULATION` (train data typed in Serial), `POTENTIOMETER_BLE_STANDIN` (the potentiometer standing in for BLE RSSI). The dashboard shows the source with each event, so simulated steps stay visible as simulated.
+
+Sensor faults are sent as events when they happen and also show up in `device/status` as `distance_cm: -1` / `tilt_deg: -1` while they last.
+
+## Demo stations (from the firmware)
+
+| ID | Role | Notes |
 |---|---|---|
-| `EDGE_WARNING` | S1, P1 | Distance to the ground jumps by > 15 cm for 3 readings (edge or step ahead) |
-| `EDGE_CLEAR` | S1 | Distance back to normal for 0.7 s |
-| `CANE_TILT_ADVISORY` | S1 | Cane tilted more than 65° for 2 s |
-| `EDGE_SENSOR_FAULT` | S1 | Ultrasonic sensor gives no echo (sound pattern: see C2). An active edge warning is not cleared by a fault |
-| `MPU_FAULT_RAW_FALLBACK` | S1 | MPU6050 not readable; edge detection keeps running on the raw distance |
-| `HELP_REQUEST` | S2 | Help button held for 3 s |
-| `CHECKPOINT` | P2 | An RFID station tag was read |
-| `SIM_TRAIN_NEAR` | P1 | Door beacon near while waiting (potentiometer stand-in or Serial `SIM TRAIN`) |
-| `BOARDING_CONFIRMED_BY_USER` | P1 | User pressed the knob after the train-near cue |
-| `SIM_DESTINATION_APPROACH` | P2 | Serial `SIM ARRIVE <id>` while on the train |
-| `ALIGHTING_CONFIRMED_BY_USER` | P1 | User pressed the knob while arriving |
-| *any state name* | — | `changeState()` also calls `event(<new state>)`, so every state change arrives as an event with the state's name |
+| `DEMO_A` | Origin | Fictional station: entrance, junction, platforms P1/P2 |
+| `DEMO_B` | Destination | Fictional; chosen with the knob or `SIM DEST B` |
+| `DEMO_C` | Destination | Fictional; chosen with the knob or `SIM DEST C` |
 
-Sensor faults are sent as events when they happen (`EDGE_SENSOR_FAULT`, `MPU_FAULT_RAW_FALLBACK`, from C2) and also show up in `device/status` as `distance_cm: -1` / `tilt_deg: -1` while they last.
-
-## Demo stations (from the sketch)
-
-| Line | Stations |
-|---|---|
-| Demo A | A01 Jakarta Kota, A02 Jayakarta, A03 Mangga Besar, A04 Sawah Besar, A05 Juanda, A06 Gondangdia |
-| Demo B | B01 Tanah Abang, B02 Palmerah, B03 Kebayoran, B04 Pondok Ranji |
-
-The dashboard uses this list to show station names. If the sketch's list changes, this table changes with it.
+The dashboard uses this list to show station names. If the firmware's list changes, this table changes with it. Card UIDs and the commands for each checkpoint are in `tests/test_scenarios.md`.
 
 ## Test without the ESP32
 
-`dashboard/fake_publisher.py` publishes exactly these topics and payloads, walking through the same route states as the sketch, so the dashboard can be tested before the firmware sends data.
+`dashboard/fake_publisher.py` publishes exactly these topics and payloads and replays the same journey as the firmware (checkpoints, a wrong tag now and then, train checks, boarding by tag, arrival, exit), so the dashboard can be tested without Wokwi.
 
-## Decisions in this draft
+## Implementation (firmware)
+
+The firmware implements this contract in `firmware/sketch.ino`: `queueMqttJson()`, `queueMqttEvent()`, `queueMqttStatus()`, `mqttTask()` and `startMqttTask()`. The rules it follows:
+
+- `loop()` and `event()` never call `mqtt.connect()`, `mqtt.loop()` or `mqtt.publish()`. All Wi-Fi and MQTT work happens in one FreeRTOS task on core 0; the sensor and alert code only hands JSON to a queue of 8 with zero wait.
+- While offline, messages are dropped, not queued (see "Delivery").
+- Each Wi-Fi join gets 15 s before it is restarted; MQTT connect is retried every 5 s; `setBufferSize(384)`, `setSocketTimeout(5)`, `setKeepAlive(30)`.
+- Last Will `"0"` on `device/online` (QoS 1, retained); `"1"` retained after each connect.
+- `setInsecure()` is acceptable for the Wokwi demo; the report should mention that a real device would verify the broker's certificate and use a private broker with logins.
+
+Still to measure in the firmware: `loopMaxMs` while connecting and while the broker is unreachable (T7b), and the time to *Offline* and back to *Online* with keep-alive 30 (T7a). Keep the Wokwi tab visible while testing: a background tab slows the simulation and can trigger a disconnect.
+
+## Decisions
 
 | Topic | Decision | Why |
 |---|---|---|
@@ -151,136 +203,11 @@ The dashboard uses this list to show station names. If the sketch's list changes
 | Direction | One way (device → dashboard) | Smaller scope for 5 days; downlink is future work |
 | Heartbeat | Every 2 s | Live chart looks responsive in the demo video |
 | Time | `uptime_s` from the ESP32, dashboard stamps arrival time | No NTP code, one less failure point in Wokwi |
-| Names | States and events exactly as in William's sketch and C2 (v3, Tue 27). The "proposed mapping" to old names in C2 is not used | The firmware is the source of truth; no renaming layer to keep in sync |
+| Names | States and events exactly as the firmware prints them (v3, Tue 27; still true in v4) | The firmware is the source of truth; no renaming layer to keep in sync |
 | Battery | Dropped (v3) | Not measured or simulated anywhere in the circuit |
 | QoS | 0 for all publishes, Last Will at QoS 1 (v3, PR #6 review) | PubSubClient can only publish at QoS 0; the status heartbeat repeats the current state |
-| Network task | Wi-Fi/MQTT in a separate FreeRTOS task on core 0 (v3, PR #6 review) | A blocking connect must not delay sensor readings or alerts; measured in the test sketch, firmware still to confirm (T7b) |
-| Keep-alive | `mqtt.setKeepAlive(30)`, **proposed** after the connectivity test (Tue 27); **not tested yet** | During that test Wokwi slowed down in a background tab and, with the 15 s default, the broker dropped the cane once. To be verified in the firmware run (T7a/T7b) |
-
-## Reference: adding MQTT to the sketch (for William)
-
-Not part of the contract, and **not a tested drop-in patch**: an illustration of the pattern (based on William's review of PR #6). Library: `PubSubClient` (add it to `libraries.txt`). No JSON library needed.
-
-**Rule:** `loop()` and `event()` never call `mqtt.connect()`, `mqtt.loop()` or `mqtt.publish()`. All Wi-Fi and MQTT work happens in one FreeRTOS task on core 0. The sensor and alert code in `loop()` (core 1) only formats JSON and hands it to a queue **without waiting**. While offline, messages are dropped, not queued (see "Delivery" above).
-
-```cpp
-#include <WiFi.h>
-#include <WiFiClientSecure.h>
-#include <PubSubClient.h>
-#include <atomic>
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/queue.h"
-#include "secrets.h"   // WIFI_SSID, WIFI_PASSWORD, MQTT_HOST, MQTT_PORT
-
-const char* T_EVENTS = "sic8/fahhh/device/events";
-const char* T_STATUS = "sic8/fahhh/device/status";
-const char* T_ONLINE = "sic8/fahhh/device/online";
-
-enum class TxKind : uint8_t { Event, Status };
-struct TxMessage { TxKind kind; char json[256]; };
-QueueHandle_t txQueue = nullptr;
-std::atomic<bool> mqttReady{false};
-
-// Called only from loop()/event(), never from an ISR. Zero wait: local alerts continue.
-bool queueJson(TxKind kind, const char* json) {
-  if (!txQueue || !mqttReady.load()) return false;   // drop while offline
-  TxMessage m{};
-  m.kind = kind;
-  int n = snprintf(m.json, sizeof(m.json), "%s", json);
-  if (n < 0 || n >= (int)sizeof(m.json)) return false;
-  return xQueueSend(txQueue, &m, 0) == pdTRUE;       // queue full: drop, never wait
-}
-
-// --- C3 JSON builders, called from the main loop -------------------------
-
-float j(float v) { return isfinite(v) ? v : -1; }   // NAN -> -1 for JSON
-
-// Call at the end of event(name, source)
-void publishEvent(const char* name, const char* source) {
-  char buf[256];
-  snprintf(buf, sizeof(buf),
-    "{\"device_id\":\"unit-01\",\"uptime_s\":%lu,\"event\":\"%s\",\"state\":\"%s\",\"source\":\"%s\",\"distance_cm\":%.0f}",
-    millis() / 1000, name, stateName(state), source, j(distanceCm));
-  queueJson(TxKind::Event, buf);
-}
-
-// Call every loop(); sends every 2 s
-unsigned long lastStatusQueued = 0;
-void publishStatus() {
-  if (millis() - lastStatusQueued < 2000) return;
-  lastStatusQueued = millis();
-  const char* station = currentNo >= 0 ? LINES[lineNo][currentNo].id : "";
-  const char* dest = state >= SEEK_PLATFORM ? LINES[lineNo][destNo].id : "";
-  char buf[256];
-  snprintf(buf, sizeof(buf),
-    "{\"device_id\":\"unit-01\",\"uptime_s\":%lu,\"state\":\"%s\",\"distance_cm\":%.0f,\"tilt_deg\":%.0f,"
-    "\"edge\":%d,\"train_near\":%d,\"help\":%d,\"station\":\"%s\",\"dest\":\"%s\"}",
-    millis() / 1000, stateName(state), j(distanceCm), j(tiltDeg),
-    edge, trainNear, help, station, dest);
-  queueJson(TxKind::Status, buf);
-}
-
-// --- network task on core 0: the only code that touches Wi-Fi/MQTT -------
-
-void mqttTask(void*) {
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD, 6);   // Wokwi-GUEST, channel 6 connects faster
-  WiFiClientSecure net;                      // local to the task: loop() cannot use it
-  net.setInsecure();                         // Wokwi demo only (see notes)
-  PubSubClient mqtt(net);
-  mqtt.setServer(MQTT_HOST, MQTT_PORT);
-  mqtt.setBufferSize(384);                   // header + topic + JSON must fit (default 256)
-  mqtt.setSocketTimeout(5);                  // default 15 s
-  mqtt.setKeepAlive(30);                     // default 15 s; proposed for Wokwi slowdowns, not tested yet
-  TxMessage m{};
-  unsigned long lastTry = millis() - 5000UL;
-  unsigned long wifiSince = millis();         // start of the current Wi-Fi join attempt
-
-  for (;;) {
-    if (WiFi.status() != WL_CONNECTED) {
-      mqttReady.store(false);
-      while (xQueueReceive(txQueue, &m, 0) == pdTRUE) {}   // no offline backlog
-      // Give each Wi-Fi join 15 s. Restarting sooner (the old 5 s here) means Wokwi never finishes joining.
-      if (millis() - wifiSince >= 15000UL) { wifiSince = millis(); WiFi.reconnect(); }
-      vTaskDelay(pdMS_TO_TICKS(50));
-      continue;
-    }
-    if (!mqtt.connected()) {
-      mqttReady.store(false);
-      while (xQueueReceive(txQueue, &m, 0) == pdTRUE) {}
-      if (millis() - lastTry >= 5000UL) {
-        lastTry = millis();
-        if (mqtt.connect("fahhh-esp32-unit-01", nullptr, nullptr,
-                         T_ONLINE, 1, true, "0")) {   // Last Will: QoS 1, retained
-          mqtt.publish(T_ONLINE, "1", true);          // normal publish: QoS 0, retained
-          mqttReady.store(true);
-        }
-      }
-      vTaskDelay(pdMS_TO_TICKS(50));
-      continue;
-    }
-    mqtt.loop();
-    if (xQueueReceive(txQueue, &m, 0) == pdTRUE)
-      mqtt.publish(m.kind == TxKind::Event ? T_EVENTS : T_STATUS, m.json);
-    vTaskDelay(pdMS_TO_TICKS(10));
-  }
-}
-
-void startMqttTask() {
-  txQueue = xQueueCreate(8, sizeof(TxMessage));
-  if (txQueue) xTaskCreatePinnedToCore(mqttTask, "mqtt", 16384, nullptr, 1, nullptr, 0);
-}
-
-// setup(): at the end, startMqttTask();
-// event(): at the end, publishEvent(name, source);
-// loop(): after all service*() calls, publishStatus();
-// Never call mqtt.connect(), mqtt.loop() or mqtt.publish() from loop() or event().
-```
-
-Notes:
-- **Measured in the test sketch, not yet in the firmware.** `tests/connectivity/sketch.ino` runs this pattern (with the Wi-Fi fix, but without `setKeepAlive(30)`, which was added after that run): TLS connect took 6.0–7.3 s and `loopMaxMs` stayed 1–3 ms (`tests/results/2026-10-27_wokwi-connectivity.md`). The firmware does more work in `loop()`, so repeat the measurement there (test T7b): print the longest `loop()` duration (`loopMaxMs`) in the 5 s Serial status, with the broker connected and while it is unreachable, and put those numbers in report 8.2.
-- Keep the Wokwi tab visible while testing: a background tab slows the simulation and can trigger a disconnect.
-- If Wokwi does not run the second task properly, say so in the report instead of claiming non-blocking behaviour.
-- `dest` is only sent from `SEEK_PLATFORM` onward, because before that the user is still choosing (the `enum` order makes `state >= SEEK_PLATFORM` work; `EMERGENCY` is last and also sends the chosen destination).
-- `setInsecure()` is acceptable for the Wokwi demo; the report should mention that a real device would verify the broker's certificate and use a private broker with logins.
+| Network task | Wi-Fi/MQTT in a separate FreeRTOS task on core 0 (v3, PR #6 review); in the firmware since PR #12 | A blocking connect must not delay sensor readings or alerts; firmware measurement is test T7b |
+| Keep-alive | `setKeepAlive(30)` (proposed after the connectivity test Tue 27; in the firmware since PR #12) | With the 15 s default, a Wokwi slowdown made the broker drop the cane once; T7a confirms the new timing |
+| Stations | `DEMO_A` / `DEMO_B` / `DEMO_C`, fictional (v4, PR #12) | The journey now models one origin station with a route to the platform, and two destinations; no real station data needed |
+| Boarding and alighting | Confirmed by tags, not by a knob press (v4, PR #12) | The cane checks the train (simulated) and reads the door tag; stepping off is the destination platform tag |
+| `station` field | Station level only (v4) | Checkpoint names change with the route style (flat, lift, ramp) and stay in Serial; the dashboard needs where the passenger is, not which tag |

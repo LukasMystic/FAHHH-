@@ -1,6 +1,6 @@
 """MQTT subscriber for the FAHHH? dashboard.
 
-Subscribes to sic8/fahhh/device/# (contracts/C3_mqtt.md, v3), checks every
+Subscribes to sic8/fahhh/device/# (contracts/C3_mqtt.md, v4), checks every
 message, keeps recent data in memory for the dashboard and appends every
 valid message to a CSV log (evidence for testing, report section 10/11).
 
@@ -109,7 +109,7 @@ def _flag(value):
 
 
 def parse_payload(payload: bytes):
-    """Check a C3 v3 JSON payload. The broker is public, so ignore anything that doesn't fit."""
+    """Check a C3 JSON payload (v4). The broker is public, so ignore anything that doesn't fit."""
     try:
         data = json.loads(payload.decode())
     except (UnicodeDecodeError, json.JSONDecodeError):

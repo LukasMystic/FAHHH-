@@ -23,10 +23,10 @@ Contract:
 ## [Role 3] William — Firmware & Logic
 
 ```
-Pain:
-Progress:
-Plan:
-Contract:
+Pain:     Full wired Wokwi journey and dashboard evidence for PR #12 still pending.
+Progress: Added a distinct local rejection cue for wrong or unregistered RFID tags; unknown UIDs now emit CHECKPOINT_REJECTED.
+Plan:     Test rejection and safety-alert priority in Wokwi, then capture full journey and MQTT subscriber evidence.
+Contract: No contract file changed in this fix.
 ```
 
 ## [Role 4] Stanley — Connectivity, Dashboard & Testing

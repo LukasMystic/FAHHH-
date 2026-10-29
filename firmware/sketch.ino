@@ -218,6 +218,11 @@ void servicePulse() {
   pat.step++;
   if(pat.step>=pat.count*2)pat.count=0;
 }
+// A rejected tag needs a distinct local cue for a blind user. Safety alarms win.
+void rejectedTagCue() {
+  if(help || edge || ultrasonicFault || mpuFault || pendingEdgePulse || pendingFaultPulse)return;
+  pulse(5,60,60,400,NAV_ALERT);
+}
 
 volatile int encoderSteps=0;
 void IRAM_ATTR encoderTick() { encoderSteps+=digitalRead(ENC_DT)==HIGH?1:-1; }
@@ -338,6 +343,7 @@ void checkpoint(String id,const char *source) {
   Serial.printf("CHECKPOINT_REJECTED got=%s expected=%s state=%s phase=%s\n",
     id.c_str(),expected.c_str(),stateName(state),phaseName(phase));
   event("CHECKPOINT_REJECTED",source);
+  rejectedTagCue();
 }
 void serviceRfid() {
   if(!rfid.PICC_IsNewCardPresent() || !rfid.PICC_ReadCardSerial())return;
@@ -351,10 +357,15 @@ void serviceRfid() {
   if(strcmp(uid,"11 22 33 44")==0)node="A_P1_WAIT";
   if(strcmp(uid,"55 66 77 88")==0)node="A_P2_WAIT";
   if(strcmp(uid,"AA BB CC DD")==0)node="TRAIN_INSIDE";
-  if(strcmp(uid,"04 11 22 33 44 55 66")==0)node="B_P1_PERON";
+  // Wokwi's gray NFC preset may be reported as a 4-byte UID by MFRC522.
+  if(strcmp(uid,"04 11 22 33 44 55 66")==0 || strcmp(uid,"04 11 22 33")==0)node="B_P1_PERON";
   if(strcmp(uid,"C0 FF EE 99")==0)node="B_LUAR";
   if(node)checkpoint(String(node),"RFID_PHYSICAL");
-  else Serial.printf("RFID_UNREGISTERED uid=%s\n",uid);
+  else {
+    Serial.printf("RFID_UNREGISTERED uid=%s\n",uid);
+    event("CHECKPOINT_REJECTED","RFID_UNREGISTERED");
+    rejectedTagCue();
+  }
   rfid.PICC_HaltA();rfid.PCD_StopCrypto1();
 }
 void refreshBoardingReady(const char *source);

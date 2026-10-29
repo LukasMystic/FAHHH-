@@ -3,7 +3,7 @@
 Live view of the cane for a companion or station staff: online/offline,
 what the passenger is doing now, where they are on their journey, distance
 to the ground, cane tilt and an event log.
-Data comes from MQTT (contracts/C3_mqtt.md, v3); every message is also logged
+Data comes from MQTT (contracts/C3_mqtt.md, v4); every message is also logged
 to dashboard/data/messages_<timestamp>.csv for the test evidence.
 Styling lives in assets/style.css (Dash loads it automatically) and follows
 Apple's Human Interface Guidelines: system font, grouped lists, system colours.
@@ -30,51 +30,79 @@ BLUE, GREEN, ORANGE, RED, GRAY = "#007aff", "#34c759", "#ff9500", "#ff3b30", "#8
 LABEL, LABEL2, GRID = "#000000", "rgba(60,60,67,0.6)", "#e5e5ea"
 FONT = "-apple-system, BlinkMacSystemFont, SF Pro Text, system-ui, Helvetica Neue, Arial, sans-serif"
 
-# Demo stations (C3 v3, same list as the sketch)
-STATIONS = {
-    "A01": "Jakarta Kota", "A02": "Jayakarta", "A03": "Mangga Besar", "A04": "Sawah Besar",
-    "A05": "Juanda", "A06": "Gondangdia",
-    "B01": "Tanah Abang", "B02": "Palmerah", "B03": "Kebayoran", "B04": "Pondok Ranji",
-}
+# Demo stations (C3 v4, fictional, same as the firmware)
+STATIONS = {"DEMO_A": "Station A", "DEMO_B": "Station B", "DEMO_C": "Station C"}
 
-# Route states (C3 v3): label and what it means for the companion
+# Route states (C3 v4): label and what it means for the companion
 STATES = {
-    "SELECT_LINE": ("Choosing Line", "The passenger is choosing a line."),
     "SELECT_DEST": ("Choosing Destination", "The passenger is choosing where to go."),
-    "SEEK_PLATFORM": ("Finding Platform", "Walking to the platform, waiting for a station tag."),
-    "WAIT_TRAIN": ("Waiting for Train", "At the platform."),
-    "ON_TRAIN": ("On the Train", "Riding to the destination."),
-    "ARRIVING": ("Arriving", "The destination is next. Getting ready to step off."),
-    "COMPLETE": ("Arrived", "Journey finished."),
+    "SEEK_PLATFORM": ("Finding Platform", "Walking to the platform, checkpoint by checkpoint."),
+    "WAIT_TRAIN": ("Waiting for Train", "On the right platform."),
+    "ON_TRAIN": ("On the Train", "Boarded the right train. Riding to the destination."),
+    "ARRIVING": ("Arriving", "At the destination. Stepping off and walking to the exit."),
+    "COMPLETE": ("Arrived", "Reached the station exit. Journey finished."),
     "EMERGENCY": ("Emergency", "Help requested."),
 }
 JOURNEY = [  # (step label, states that count as this step)
-    ("Choose destination", {"SELECT_LINE", "SELECT_DEST"}),
+    ("Choose destination", {"SELECT_DEST"}),
     ("Find the platform", {"SEEK_PLATFORM"}),
     ("Wait for the train", {"WAIT_TRAIN"}),
     ("Ride the train", {"ON_TRAIN"}),
-    ("Arrive", {"ARRIVING"}),
-    ("Step off", {"COMPLETE"}),
+    ("Step off, find the exit", {"ARRIVING"}),
+    ("Leave the station", {"COMPLETE"}),
 ]
 
-# Events (C3 v3): title and severity class (colour comes from style.css)
+# Events (C3 v4): title and severity class (colour comes from style.css)
 EVENTS = {
+    # Safety
     "EDGE_WARNING": ("Edge Ahead", "WARNING"),
     "EDGE_CLEAR": ("Edge Cleared", "NORMAL"),
     "CANE_TILT_ADVISORY": ("Cane Tilted Too Far", "WARNING"),
     "EDGE_SENSOR_FAULT": ("Distance Sensor Fault", "WARNING"),
+    "EDGE_SENSOR_RECOVERED": ("Distance Sensor Back", "NORMAL"),
     "MPU_FAULT_RAW_FALLBACK": ("Tilt Sensor Fault", "WARNING"),
+    "MPU_RECOVERED": ("Tilt Sensor Back", "NORMAL"),
     "HELP_REQUEST": ("Help Requested", "EMERGENCY"),
-    "CHECKPOINT": ("Station Tag Read", "INFO"),
-    "SIM_TRAIN_NEAR": ("Train at the Door", "INFO"),
-    "BOARDING_CONFIRMED_BY_USER": ("Boarded", "INFO"),
-    "SIM_DESTINATION_APPROACH": ("Destination Next", "INFO"),
-    "ALIGHTING_CONFIRMED_BY_USER": ("Stepped Off", "NORMAL"),
+    # Route
+    "CHECKPOINT": ("Checkpoint Tag Read", "INFO"),
+    "CHECKPOINT_REJECTED": ("Wrong or Unknown Tag", "WARNING"),
+    # Train and boarding (simulated in Wokwi)
+    "SIM_TRAIN_NEAR": ("Train Door Nearby", "INFO"),
+    "TRAIN_MATCH": ("Right Train", "INFO"),
+    "TRAIN_REJECTED": ("Wrong Train", "WARNING"),
+    "TRAIN_STOPPED": ("Train Stopped", "INFO"),
+    "TRAIN_MOVING": ("Train Moving", "INFO"),
+    "TRAIN_DOOR_OPEN": ("Doors Open", "INFO"),
+    "TRAIN_DOOR_CLOSED": ("Doors Closed", "INFO"),
+    "BOARDING_READY": ("Ready to Board", "INFO"),
+    "BOARDING_CANCELLED": ("Boarding Paused", "WARNING"),
+    "BOARDING_CONFIRMED_BY_TAG": ("Boarded", "INFO"),
+    "SIM_DESTINATION_APPROACH": ("Arriving at Destination", "INFO"),
 }
 SEVERITY_WORD = {"WARNING": "Warning", "EMERGENCY": "Emergency", "NORMAL": "OK", "INFO": "Info"}
+SOURCES = {  # event source (C3 v4) -> words for the companion; simulated inputs say so
+    "RFID_PHYSICAL": "RFID card",
+    "RFID_UNREGISTERED": "unregistered RFID card",
+    "SERIAL_SIMULATION": "simulated tag (Serial)",
+    "SERIAL_TRAIN_SIMULATION": "simulated train data (Serial)",
+    "POTENTIOMETER_BLE_STANDIN": "simulated beacon (potentiometer)",
+    "HC_SR04": "distance sensor",
+    "HC_SR04_MPU6050": "distance sensor, tilt-corrected",
+    "HC_SR04_RAW_FALLBACK": "distance sensor, raw reading",
+    "HC_SR04_EDGE": "edge warning",
+    "HC_SR04_EDGE_CLEAR": "edge cleared",
+    "HC_SR04_FAULT": "distance sensor fault",
+    "HC_SR04_RECOVERED": "distance sensor back",
+    "MPU6050": "tilt sensor",
+    "encoder_button": "knob press",
+    "encoder_long_press_reset": "knob held, reset",
+    "SERIAL_DEMO_RESET": "ACK HELP demo reset (Serial)",
+    "physical_help_button_long_press": "help button held 3 s",
+}
 CHART_MARKS = {  # event -> (symbol, colour, legend label) on the distance chart
     "EDGE_WARNING": ("triangle-down", ORANGE, "Edge ahead"),
-    "CHECKPOINT": ("circle", BLUE, "Station tag"),
+    "CHECKPOINT": ("circle", BLUE, "Checkpoint tag"),
+    "CHECKPOINT_REJECTED": ("x", ORANGE, "Wrong tag"),
     "HELP_REQUEST": ("square", RED, "Help requested"),
 }
 
@@ -82,7 +110,7 @@ CHART_MARKS = {  # event -> (symbol, colour, legend label) on the distance chart
 def station_text(code):
     if not code:
         return "None yet"
-    return f"{code} {STATIONS[code]}" if code in STATIONS else code
+    return STATIONS.get(code, code)
 
 
 def chart_layout(fig, y_suffix, y_range, height, legend=False):
@@ -188,7 +216,7 @@ def now_card(snap, last, live):
         word, what = STATES.get(last["state"], (last["state"].replace("_", " ").title(), ""))
         cls = "NORMAL" if last["state"] == "COMPLETE" else "GUIDING"
         if last["state"] == "WAIT_TRAIN" and last["train_near"]:
-            what = "The train is at the door. Waiting for the passenger to confirm boarding."
+            what = "A train door is near. The cane checks it is the right train, stopped, with the doors open."
         if last["state"] in ("ON_TRAIN", "ARRIVING", "COMPLETE") and last["dest"]:
             what += f" Destination {station_text(last['dest'])}."
         when = ""
@@ -273,12 +301,12 @@ def build_app(store):
             edges = sum(e["event"] == "EDGE_WARNING" for e in recent)
             readings = [
                 row("Destination", station_text(last["dest"]) if last["dest"] else "Not chosen yet"),
-                row("Last Station Tag", station_text(last["station"])),
+                row("Last Station", station_text(last["station"])),
                 row("Distance to Ground", "No reading" if last["distance_cm"] is None else f"{last['distance_cm']:.0f} cm",
                     "value WARNING" if last["edge"] else "value"),
                 row("Cane Tilt", "No reading" if last["tilt_deg"] is None else f"{last['tilt_deg']:.0f}°",
                     "value WARNING" if (last["tilt_deg"] or 0) > TILT_ADVISORY_DEG else "value"),
-                row("Train at Door", "Yes" if last["train_near"] else "No"),
+                row("Train Door Nearby", "Yes" if last["train_near"] else "No"),
                 row(f"Edge Warnings, Last {WINDOW_MIN} Min", f"{edges}", "value WARNING" if edges else "value"),
                 row(f"Help Requests, Last {WINDOW_MIN} Min", f"{helps}", "value EMERGENCY" if helps else "value"),
                 row("Cane Uptime", uptime_text(last["uptime_s"])),
@@ -301,7 +329,7 @@ def build_app(store):
             if e["distance_cm"] is not None and e["event"] in ("EDGE_WARNING", "EDGE_CLEAR", "HELP_REQUEST"):
                 detail.append(f"{e['distance_cm']:.0f} cm")
             if e["source"]:
-                detail.append(f"from {e['source'].replace('_', ' ').lower()}")
+                detail.append("from " + SOURCES.get(e["source"], e["source"].replace("_", " ").lower()))
             rows.append(html.Div([
                 html.Div([
                     html.Span(title),

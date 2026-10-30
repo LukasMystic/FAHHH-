@@ -1,0 +1,1213 @@
+ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:1156
+load:0x40078000,len:11456
+ho 0 tail 12 room 4
+load:0x40080400,len:2972
+entry 0x400805dc
+SIC8 fictional station journey | C1 pin map | MQTT outbound demo
+Potentiometer stands in for BLE proximity; serial commands stand in for train telemetry
+SOS: hold button about 3 s; edge distance corrected with MPU tilt
+MENU destination B/C: rotate, short press to confirm; long press to reset
+Type HELP for simulation commands
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 403 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: offline; drop=2; loopMaxMs=39.28
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 403 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: offline; drop=5; loopMaxMs=25.31
+MQTT connected; QoS 0 publishes enabled
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 404 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=36.15
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 404 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=25.93
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 404 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=26.23
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 403 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=37.44
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=25.31
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=13.60
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=13.13
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=13.61
+MENU destination=DEMO_B; press encoder to confirm
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=13.49
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=13.75
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=13.75
+STATE SELECT_DEST -> SEEK_PLATFORM source=encoder_button
+EVENT t=69317 event=SEEK_PLATFORM state=SEEK_PLATFORM source=encoder_button distance_cm=21.1 beacon_adc=0
+ROUTE destination=DEMO_B origin=FLAT dest_exit=FLAT origin_side=P1 dest_side=P1 next=A_MASUK
+
+[STATUS] SEEK_PLATFORM phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=A_MASUK
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=15.08
+
+[STATUS] SEEK_PLATFORM phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=A_MASUK
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=13.96
+
+[STATUS] SEEK_PLATFORM phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=A_MASUK
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=23.28
+
+[STATUS] SEEK_PLATFORM phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=A_MASUK
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=13.72
+
+[STATUS] SEEK_PLATFORM phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=A_MASUK
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=13.21
+
+[STATUS] SEEK_PLATFORM phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=A_MASUK
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=13.83
+
+[STATUS] SEEK_PLATFORM phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=A_MASUK
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=13.65
+CHECKPOINT A_MASUK source=RFID_PHYSICAL next=A_SIMPANG
+EVENT t=102460 event=CHECKPOINT state=SEEK_PLATFORM source=RFID_PHYSICAL distance_cm=21.1 beacon_adc=0
+
+[STATUS] SEEK_PLATFORM phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=A_SIMPANG
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_MASUK
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=20.48
+
+[STATUS] SEEK_PLATFORM phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=A_SIMPANG
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_MASUK
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=23.53
+
+[STATUS] SEEK_PLATFORM phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=A_SIMPANG
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_MASUK
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=23.92
+
+[STATUS] SEEK_PLATFORM phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=A_SIMPANG
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_MASUK
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=23.85
+
+[STATUS] SEEK_PLATFORM phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=A_SIMPANG
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_MASUK
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=25.20
+
+[STATUS] SEEK_PLATFORM phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=A_SIMPANG
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_MASUK
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=25.25
+
+[STATUS] SEEK_PLATFORM phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=A_SIMPANG
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_MASUK
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=23.84
+
+[STATUS] SEEK_PLATFORM phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=A_SIMPANG
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_MASUK
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=23.84
+CHECKPOINT A_SIMPANG source=SERIAL_SIMULATION next=A_P1_WAIT
+EVENT t=144744 event=CHECKPOINT state=SEEK_PLATFORM source=SERIAL_SIMULATION distance_cm=21.1 beacon_adc=0
+
+[STATUS] SEEK_PLATFORM phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=A_P1_WAIT
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_SIMPANG
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=24.02
+
+[STATUS] SEEK_PLATFORM phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=A_P1_WAIT
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_SIMPANG
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=23.64
+
+[STATUS] SEEK_PLATFORM phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=A_P1_WAIT
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_SIMPANG
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=23.85
+
+[STATUS] SEEK_PLATFORM phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=A_P1_WAIT
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_SIMPANG
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=23.64
+
+[STATUS] SEEK_PLATFORM phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=A_P1_WAIT
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_SIMPANG
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=24.15
+
+[STATUS] SEEK_PLATFORM phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=A_P1_WAIT
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_SIMPANG
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=24.18
+CHECKPOINT_REJECTED got=A_P2_WAIT expected=A_P1_WAIT state=SEEK_PLATFORM phase=TO_ORIGIN_PLATFORM
+EVENT t=170540 event=CHECKPOINT_REJECTED state=SEEK_PLATFORM source=RFID_PHYSICAL distance_cm=21.2 beacon_adc=0
+
+[STATUS] SEEK_PLATFORM phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=A_P1_WAIT
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_SIMPANG
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=23.59
+
+[STATUS] SEEK_PLATFORM phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=A_P1_WAIT
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_SIMPANG
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=23.93
+
+[STATUS] SEEK_PLATFORM phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=A_P1_WAIT
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_SIMPANG
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=23.49
+CHECKPOINT A_P1_WAIT source=RFID_PHYSICAL next=WAIT_TRAIN
+EVENT t=185826 event=CHECKPOINT state=SEEK_PLATFORM source=RFID_PHYSICAL distance_cm=21.2 beacon_adc=0
+STATE SEEK_PLATFORM -> WAIT_TRAIN source=RFID_PHYSICAL
+EVENT t=185838 event=WAIT_TRAIN state=WAIT_TRAIN source=RFID_PHYSICAL distance_cm=21.2 beacon_adc=0
+WAIT_TRAIN at A_P1_WAIT; expected train=TRAIN01 side=P1 dest=DEMO_B
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=0 identity=0 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-100 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.11
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=0 identity=0 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-100 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.71
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=0 identity=0 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-100 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.86
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=0 identity=0 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-100 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.66
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=0 identity=0 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-100 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.47
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=0 identity=0 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-100 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.85
+EVENT t=218233 event=SIM_TRAIN_NEAR state=WAIT_TRAIN source=POTENTIOMETER_BLE_STANDIN distance_cm=21.2 beacon_adc=2746
+TRAIN_NEAR is a simulated proximity cue, not train identity
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=0 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.30
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=0 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.43
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=0 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.49
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=0 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.17
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=0 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.72
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=0 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.24
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=0 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.83
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=0 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.13
+CHECKPOINT_REJECTED got=TRAIN_INSIDE expected=TRAIN_INSIDE state=WAIT_TRAIN phase=AT_ORIGIN_PLATFORM
+EVENT t=257187 event=CHECKPOINT_REJECTED state=WAIT_TRAIN source=RFID_PHYSICAL distance_cm=21.1 beacon_adc=2838
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=0 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.04
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=0 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=36.62
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=0 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.65
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=0 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.22
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=0 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.64
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=0 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.57
+EVENT t=287405 event=TRAIN_REJECTED state=WAIT_TRAIN source=SERIAL_TRAIN_SIMULATION distance_cm=21.2 beacon_adc=2838
+TRAIN_REJECTED got=TRAIN01/P2/B expected=TRAIN01/P1/B
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=0 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.31
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=0 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.96
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=0 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.32
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=0 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.67
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=0 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.48
+EVENT t=310153 event=TRAIN_MATCH state=WAIT_TRAIN source=SERIAL_TRAIN_SIMULATION distance_cm=21.1 beacon_adc=2838
+TRAIN_MATCH TRAIN01 side=P1 destination=B; await STOPPED and DOOR OPEN
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.92
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.85
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.20
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.71
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.41
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.83
+Unknown command; type HELP
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.79
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.77
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.41
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.95
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.38
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.78
+Unknown command; type HELP
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.03
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.85
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.27
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.88
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.65
+Unknown command; type HELP
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.74
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.27
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.72
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.11
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.85
+Unknown command; type HELP
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.31
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.74
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.31
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.87
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.31
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.56
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.10
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.78
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.09
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.58
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.18
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.83
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.12
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.81
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.15
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.06
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.89
+EVENT t=505223 event=TRAIN_MATCH state=WAIT_TRAIN source=SERIAL_TRAIN_SIMULATION distance_cm=21.2 beacon_adc=2838
+TRAIN_MATCH TRAIN01 side=P1 destination=B; await STOPPED and DOOR OPEN
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.32
+EVENT t=513686 event=TRAIN_STOPPED state=WAIT_TRAIN source=SERIAL_TRAIN_SIMULATION distance_cm=21.1 beacon_adc=2838
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=1 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.05
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=1 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.57
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=1 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.86
+EVENT t=526089 event=TRAIN_DOOR_OPEN state=WAIT_TRAIN source=SERIAL_TRAIN_SIMULATION distance_cm=21.1 beacon_adc=2838
+EVENT t=526091 event=BOARDING_READY state=WAIT_TRAIN source=SERIAL_TRAIN_SIMULATION distance_cm=21.1 beacon_adc=2838
+BOARDING_READY: train data and local conditions align; still probe the platform gap with the cane
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=1 door_open=1 boarding_ready=1; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.79
+
+[STATUS] WAIT_TRAIN phase=AT_ORIGIN_PLATFORM destination=DEMO_B next=TRAIN_INSIDE (after matching train, STOPPED, DOOR OPEN, near cue)
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=A_P1_WAIT
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=1 identity=1 stopped=1 door_open=1 boarding_ready=1; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=35.86
+STATE WAIT_TRAIN -> ON_TRAIN source=RFID_PHYSICAL
+EVENT t=539856 event=ON_TRAIN state=ON_TRAIN source=RFID_PHYSICAL distance_cm=21.2 beacon_adc=2838
+EVENT t=539868 event=BOARDING_CONFIRMED_BY_TAG state=ON_TRAIN source=RFID_PHYSICAL distance_cm=21.2 beacon_adc=2838
+ON_TRAIN means cane reader reached the inside tag; body position is not independently proven
+
+[STATUS] ON_TRAIN phase=ONBOARD destination=DEMO_B next=SIM ARRIVE B
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=TRAIN_INSIDE
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=35.16
+
+[STATUS] ON_TRAIN phase=ONBOARD destination=DEMO_B next=SIM ARRIVE B
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=TRAIN_INSIDE
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=23.90
+
+[STATUS] ON_TRAIN phase=ONBOARD destination=DEMO_B next=SIM ARRIVE B
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=TRAIN_INSIDE
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=14.27
+
+[STATUS] ON_TRAIN phase=ONBOARD destination=DEMO_B next=SIM ARRIVE B
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=TRAIN_INSIDE
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=23.68
+
+[STATUS] ON_TRAIN phase=ONBOARD destination=DEMO_B next=SIM ARRIVE B
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=TRAIN_INSIDE
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=14.18
+STATE ON_TRAIN -> ARRIVING source=SERIAL_TRAIN_SIMULATION
+EVENT t=562088 event=ARRIVING state=ARRIVING source=SERIAL_TRAIN_SIMULATION distance_cm=21.2 beacon_adc=2838
+EVENT t=562100 event=SIM_DESTINATION_APPROACH state=ARRIVING source=SERIAL_TRAIN_SIMULATION distance_cm=21.2 beacon_adc=2838
+ARRIVING DEMO_B; await SIM STOPPED, SIM DOOR OPEN P1, and destination platform tag
+
+[STATUS] ARRIVING phase=VERIFY_DEST_PLATFORM destination=DEMO_B next=B_P1_PERON
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=TRAIN_INSIDE
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=0 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=28.04
+
+[STATUS] ARRIVING phase=VERIFY_DEST_PLATFORM destination=DEMO_B next=B_P1_PERON
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=TRAIN_INSIDE
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=0 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=25.22
+
+[STATUS] ARRIVING phase=VERIFY_DEST_PLATFORM destination=DEMO_B next=B_P1_PERON
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=TRAIN_INSIDE
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=0 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=25.71
+
+[STATUS] ARRIVING phase=VERIFY_DEST_PLATFORM destination=DEMO_B next=B_P1_PERON
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=TRAIN_INSIDE
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=0 identity=1 stopped=0 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=25.35
+EVENT t=584754 event=TRAIN_STOPPED state=ARRIVING source=SERIAL_TRAIN_SIMULATION distance_cm=21.2 beacon_adc=2838
+
+[STATUS] ARRIVING phase=VERIFY_DEST_PLATFORM destination=DEMO_B next=B_P1_PERON
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=TRAIN_INSIDE
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=0 identity=1 stopped=1 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=25.79
+
+[STATUS] ARRIVING phase=VERIFY_DEST_PLATFORM destination=DEMO_B next=B_P1_PERON
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=TRAIN_INSIDE
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=0 identity=1 stopped=1 door_open=0 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=25.56
+EVENT t=591822 event=TRAIN_DOOR_OPEN state=ARRIVING source=SERIAL_TRAIN_SIMULATION distance_cm=21.2 beacon_adc=2838
+
+[STATUS] ARRIVING phase=VERIFY_DEST_PLATFORM destination=DEMO_B next=B_P1_PERON
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=TRAIN_INSIDE
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=0 identity=1 stopped=1 door_open=1 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=25.05
+
+[STATUS] ARRIVING phase=VERIFY_DEST_PLATFORM destination=DEMO_B next=B_P1_PERON
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=TRAIN_INSIDE
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=0 identity=1 stopped=1 door_open=1 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=25.59
+
+[STATUS] ARRIVING phase=VERIFY_DEST_PLATFORM destination=DEMO_B next=B_P1_PERON
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=TRAIN_INSIDE
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=0 identity=1 stopped=1 door_open=1 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=24.73
+DESTINATION_PLATFORM_CONFIRMED B_P1_PERON next=B_SIMPANG
+EVENT t=605189 event=CHECKPOINT state=ARRIVING source=RFID_PHYSICAL distance_cm=21.2 beacon_adc=2838
+
+[STATUS] ARRIVING phase=TO_DEST_EXIT destination=DEMO_B next=B_SIMPANG
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=B_P1_PERON
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=0 identity=1 stopped=1 door_open=1 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=25.40
+
+[STATUS] ARRIVING phase=TO_DEST_EXIT destination=DEMO_B next=B_SIMPANG
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=B_P1_PERON
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=0 identity=1 stopped=1 door_open=1 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=24.53
+
+[STATUS] ARRIVING phase=TO_DEST_EXIT destination=DEMO_B next=B_SIMPANG
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=B_P1_PERON
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=0 identity=1 stopped=1 door_open=1 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=24.89
+
+[STATUS] ARRIVING phase=TO_DEST_EXIT destination=DEMO_B next=B_SIMPANG
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=B_P1_PERON
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=0 identity=1 stopped=1 door_open=1 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=25.39
+
+[STATUS] ARRIVING phase=TO_DEST_EXIT destination=DEMO_B next=B_SIMPANG
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=B_P1_PERON
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=0 identity=1 stopped=1 door_open=1 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=24.94
+
+[STATUS] ARRIVING phase=TO_DEST_EXIT destination=DEMO_B next=B_SIMPANG
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=B_P1_PERON
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=0 identity=1 stopped=1 door_open=1 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=25.54
+
+[STATUS] ARRIVING phase=TO_DEST_EXIT destination=DEMO_B next=B_SIMPANG
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=B_P1_PERON
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=0 identity=1 stopped=1 door_open=1 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=25.02
+
+[STATUS] ARRIVING phase=TO_DEST_EXIT destination=DEMO_B next=B_SIMPANG
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=B_P1_PERON
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=0 identity=1 stopped=1 door_open=1 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=25.31
+
+[STATUS] ARRIVING phase=TO_DEST_EXIT destination=DEMO_B next=B_SIMPANG
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=B_P1_PERON
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=0 identity=1 stopped=1 door_open=1 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=25.06
+CHECKPOINT B_SIMPANG source=SERIAL_SIMULATION next=B_LUAR
+EVENT t=651855 event=CHECKPOINT state=ARRIVING source=SERIAL_SIMULATION distance_cm=21.1 beacon_adc=2838
+
+[STATUS] ARRIVING phase=TO_DEST_EXIT destination=DEMO_B next=B_LUAR
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=B_SIMPANG
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=0 identity=1 stopped=1 door_open=1 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=25.74
+
+[STATUS] ARRIVING phase=TO_DEST_EXIT destination=DEMO_B next=B_LUAR
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=B_SIMPANG
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=0 identity=1 stopped=1 door_open=1 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=24.88
+
+[STATUS] ARRIVING phase=TO_DEST_EXIT destination=DEMO_B next=B_LUAR
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=B_SIMPANG
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  Train: near=0 identity=1 stopped=1 door_open=1 boarding_ready=0; beacon_sim=-58 dBm
+  MQTT: connected; drop=5; loopMaxMs=25.58
+CHECKPOINT B_LUAR source=RFID_PHYSICAL next=COMPLETE
+EVENT t=665688 event=CHECKPOINT state=ARRIVING source=RFID_PHYSICAL distance_cm=21.1 beacon_adc=2838
+STATE ARRIVING -> COMPLETE source=RFID_PHYSICAL
+EVENT t=665700 event=COMPLETE state=COMPLETE source=RFID_PHYSICAL distance_cm=21.1 beacon_adc=2838
+
+[STATUS] COMPLETE phase=DONE destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=B_LUAR
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=31.73
+
+[STATUS] COMPLETE phase=DONE destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=B_LUAR
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=13.06
+
+[STATUS] COMPLETE phase=DONE destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=B_LUAR
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=13.25
+
+[STATUS] COMPLETE phase=DONE destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=B_LUAR
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=13.35
+
+[STATUS] COMPLETE phase=DONE destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=B_LUAR
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=13.51
+
+[STATUS] COMPLETE phase=DONE destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=B_LUAR
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=13.39
+
+[STATUS] COMPLETE phase=DONE destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=B_LUAR
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=13.03
+
+[STATUS] COMPLETE phase=DONE destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=B_LUAR
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=13.43
+
+[STATUS] COMPLETE phase=DONE destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=B_LUAR
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=14.69
+
+[STATUS] COMPLETE phase=DONE destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=B_LUAR
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=13.36
+
+[STATUS] COMPLETE phase=DONE destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=B_LUAR
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=12.91
+
+[STATUS] COMPLETE phase=DONE destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=B_LUAR
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=13.59
+
+[STATUS] COMPLETE phase=DONE destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=B_LUAR
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=12.94
+
+[STATUS] COMPLETE phase=DONE destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=B_LUAR
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=13.54
+
+[STATUS] COMPLETE phase=DONE destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=B_LUAR
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=13.05
+
+[STATUS] COMPLETE phase=DONE destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=B_LUAR
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=13.58
+
+[STATUS] COMPLETE phase=DONE destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=B_LUAR
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=5; loopMaxMs=13.45
+
+
+
+

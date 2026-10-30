@@ -1,0 +1,252 @@
+ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:1156
+load:0x40078000,len:11456
+ho 0 tail 12 room 4
+load:0x40080400,len:2972
+entry 0x400805dc
+SIC8 fictional station journey | C1 pin map | MQTT outbound demo
+Potentiometer stands in for BLE proximity; serial commands stand in for train telemetry
+SOS: hold button about 3 s; edge distance corrected with MPU tilt
+MENU destination B/C: rotate, short press to confirm; long press to reset
+Type HELP for simulation commands
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: offline; drop=2; loopMaxMs=16.24
+MQTT connected; QoS 0 publishes enabled
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=3; loopMaxMs=12.55
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=3; loopMaxMs=15.46
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=3; loopMaxMs=13.80
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=3; loopMaxMs=13.82
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=3; loopMaxMs=13.61
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=3; loopMaxMs=14.79
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=3; loopMaxMs=13.14
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=3; loopMaxMs=14.78
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=3; loopMaxMs=12.97
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=3; loopMaxMs=14.68
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=3; loopMaxMs=13.33
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=3; loopMaxMs=14.68
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=3; loopMaxMs=13.74
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=3; loopMaxMs=13.99
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=3; loopMaxMs=13.78
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=3; loopMaxMs=13.81
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=3; loopMaxMs=14.79
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=3; loopMaxMs=13.83
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=3; loopMaxMs=13.79
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=3; loopMaxMs=13.51
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=3; loopMaxMs=13.51
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=3; loopMaxMs=15.07
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=3; loopMaxMs=13.71
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=3; loopMaxMs=13.62
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=3; loopMaxMs=13.76
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=3; loopMaxMs=13.84
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=3; loopMaxMs=13.32
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=3; loopMaxMs=13.74
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=3; loopMaxMs=13.77
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: connected; drop=3; loopMaxMs=13.09
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: offline; drop=4; loopMaxMs=13.78
+
+[STATUS] SELECT_DEST phase=TO_ORIGIN_PLATFORM destination=DEMO_B next=
+  Map: origin=FLAT exit=FLAT platform=P1/P1 checkpoint=
+  Jarak bawah: 21 cm (koreksi MPU)
+  Miring: 0 derajat
+  Tepi: tidak ada peringatan
+  MQTT: offline; drop=7; loopMaxMs=13.84
+
+
+
+
